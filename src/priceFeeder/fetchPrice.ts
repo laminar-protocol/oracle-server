@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 
-import envVars from '../env';
+import envVars from '../envVars';
 
 const RES_DATA_KEY = 'Realtime Currency Exchange Rate';
 const EXCHANGE_RATE_KEY = '5. Exchange Rate';

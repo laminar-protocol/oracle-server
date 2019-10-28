@@ -9,11 +9,11 @@ export default class OracleContract {
   private _contract: Contract;
   private _addr: string;
 
-  constructor(web3: Web3, addr: string) {
+  constructor(web3: Web3, addr: string, gasLimit: number) {
     this._contract = new web3.eth.Contract(
       simplePriceOracleAbi,
-      process.env[envVars.ORACLE_CONTRACT_ADDR],
-      { gas: process.env[envVars.GAS_LIMIT] },
+      addr,
+      { gas: gasLimit },
     );
   }
 

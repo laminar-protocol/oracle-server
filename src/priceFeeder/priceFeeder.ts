@@ -11,6 +11,7 @@ export type PriceFeederConfig = {
   ethPrivateKey: string,
   oracleContractAddr: string,
   assetPairs: AssetPairs,
+  gasLimit: number,
 }
 
 export default class PriceFeeder {
@@ -26,7 +27,7 @@ export default class PriceFeeder {
     this._web3 = new Web3(config.web3Provider);
     this._chain = config.chain;
     this._feederAccount = this._web3.eth.accounts.privateKeyToAccount(config.ethPrivateKey);
-    this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr);
+    this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr, config.gasLimit);
     this._assetPairs = config.assetPairs;
     this._continue = false;
   }
@@ -53,9 +54,9 @@ export default class PriceFeeder {
     // }
   };
 
-  private _fetchAndFeedPrice = async (assetPair: AssetPair) => {
-    const price = await fetchPrice(assetPair.fromAsset, assetPair.toAsset);
-    const callData = this._oracleContract.feedPriceEncoded(price, assetPair.key);
+  private _fetchAndFeedPrice = async ({ fromAsset, toAsset, keyAddr }: AssetPair) => {
+    const price = await fetchPrice(fromAsset, toAsset);
+    const callData = this._oracleContract.feedPriceEncoded(price, keyAddr);
 
     const tx = {
       from: this._feederAccount.address,

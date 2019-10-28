@@ -1,25 +1,33 @@
-import Web3 from "web3";
-import { Account } from "web3-core";
+import Web3 from 'web3';
+import { Account } from 'web3-core';
 
-import envVars from '../envVars';
 import fetchPrice from './fetchPrice';
 import { AssetPair, AssetPairs } from './types';
 import OracleContract from "./oracleContract";
+
+export type PriceFeederConfig = {
+  web3Provider: string,
+  chain: string,
+  ethPrivateKey: string,
+  oracleContractAddr: string,
+  assetPairs: AssetPairs,
+}
 
 export default class PriceFeeder {
   private _web3: Web3;
   private _chain: string;
   private _feederAccount: Account;
   private _oracleContract: OracleContract;
-  private _continue: boolean;
   private _assetPairs: AssetPairs;
 
-  constructor(assetPairs: AssetPairs) {
-    this._web3 = new Web3(process.env[envVars.WEB3_PROVIDER]);
-    this._chain = process.env[envVars.CHAIN];
-    this._feederAccount = this._web3.eth.accounts.privateKeyToAccount(process.env[envVars.ETH_PRIVATE_KEY]);
-    this._oracleContract = new OracleContract(this._web3, process.env[envVars.ORACLE_CONTRACT_ADDR]);
-    this._assetPairs = assetPairs;
+  private _continue: boolean;
+
+  constructor(config: PriceFeederConfig) {
+    this._web3 = new Web3(config.web3Provider);
+    this._chain = config.chain;
+    this._feederAccount = this._web3.eth.accounts.privateKeyToAccount(config.ethPrivateKey);
+    this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr);
+    this._assetPairs = config.assetPairs;
     this._continue = false;
   }
 
@@ -47,7 +55,7 @@ export default class PriceFeeder {
 
   private _fetchAndFeedPrice = async (assetPair: AssetPair) => {
     const price = await fetchPrice(assetPair.fromAsset, assetPair.toAsset);
-    const callData = this._oracleContract.feedPriceEncoded(price, assetPair.priceKey);
+    const callData = this._oracleContract.feedPriceEncoded(price, assetPair.key);
 
     const tx = {
       from: this._feederAccount.address,

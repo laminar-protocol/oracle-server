@@ -5,12 +5,12 @@ const main = () => {
     {
       fromAsset: 'JPY',
       toAsset: 'USD',
-      priceKey: 'fJPY',
+      key: 'fJPY',
     },
     {
       fromAsset: 'EUR',
       toAsset: 'USD',
-      priceKey: 'fEUR',
+      key: 'fEUR',
     }
   ];
   startFeedingPrice(assetPairs);

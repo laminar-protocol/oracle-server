@@ -13,7 +13,7 @@ export type PriceFeederConfig = {
   oracleContractAddr: string;
   assetPairs: AssetPairs;
   gasLimit: number;
-  intervalByMs: number,
+  intervalByMs: number;
 };
 
 export default class PriceFeeder {
@@ -59,7 +59,7 @@ export default class PriceFeeder {
   };
 
   private _poll = async () => {
-    while(this._continue) {
+    while (this._continue) {
       for (const assetPair of this._assetPairs) {
         try {
           await this._fetchAndFeedPrice(assetPair);
@@ -67,7 +67,7 @@ export default class PriceFeeder {
           logger.error(`${err}`);
         }
       }
-      
+
       await sleep(this._intervalByMs);
     }
   };

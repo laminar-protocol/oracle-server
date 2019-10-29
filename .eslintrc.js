@@ -44,5 +44,6 @@ module.exports = {
     'no-loop-func': 'off',
     'no-underscore-dangle': 'off',
     'no-unused-expressions': 'off',
+    'lines-between-class-members': 'off',
   },
 };

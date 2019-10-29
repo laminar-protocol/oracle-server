@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import * as web3Utils from 'web3-utils';
-import { Contract } from "web3-eth-contract";
-import simplePriceOracleAbi from "flow-protocol/artifacts/abi/SimplePriceOracle.json";
+import { Contract } from 'web3-eth-contract';
+import simplePriceOracleAbi from 'flow-protocol/artifacts/abi/SimplePriceOracle.json';
 
 export default class OracleContract {
   private _contract: Contract;

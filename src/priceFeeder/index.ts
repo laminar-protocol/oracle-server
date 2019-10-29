@@ -4,42 +4,6 @@ import envVars from '../envVars';
 import { AssetPair, AssetPairs } from './types';
 import PriceFeeder, { PriceFeederConfig } from './priceFeeder';
 
-const DEPLOYED_ORACLE_ADDR_KEY = 'oracle';
-
-const startFeedingPrice = () => {
-  const deployed = (deployment as any)[process.env[envVars.CHAIN]];
-
-  const oracleContractAddr = deployed
-    ? deployed[DEPLOYED_ORACLE_ADDR_KEY]
-    : process.env[envVars.LOCAL_TESTNET_ORACLE_CONTRACT_ADDR];
-  if (!oracleContractAddr) {
-    throw new Error('no oracle contract addr');
-  }
-
-  const assetPairs = getAssetPairs([
-    {
-      fromAsset: 'JPY',
-      toAsset: 'USD',
-      key: 'fJPY',
-    },
-    {
-      fromAsset: 'EUR',
-      toAsset: 'USD',
-      key: 'fEUR',
-    }
-  ], deployed);
-
-  const config: PriceFeederConfig = {
-    web3Provider: process.env[envVars.WEB3_PROVIDER],
-    ethPrivateKey: process.env[envVars.ETH_PRIVATE_KEY],
-    oracleContractAddr,
-    assetPairs,
-    gasLimit: Number(process.env[envVars.GAS_LIMIT]),
-  };
-  const priceFeeder = new PriceFeeder(config);
-  priceFeeder.start();
-};
-
 const getAssetPairs = (assetPairs: AssetPairs, deployed: any): AssetPairs =>
   assetPairs.map((assetPair: AssetPair) => {
     const { key } = assetPair;
@@ -57,5 +21,39 @@ const getAssetPairs = (assetPairs: AssetPairs, deployed: any): AssetPairs =>
     }
     return { ...assetPair, keyAddr };
   });
+
+const DEPLOYED_ORACLE_ADDR_KEY = 'oracle';
+
+const startFeedingPrice = () => {
+  const deployed = (deployment as any)[process.env[envVars.CHAIN]];
+
+  const oracleContractAddr = deployed ? deployed[DEPLOYED_ORACLE_ADDR_KEY] : process.env[envVars.LOCAL_TESTNET_ORACLE_CONTRACT_ADDR];
+  if (!oracleContractAddr) {
+    throw new Error('no oracle contract addr');
+  }
+
+  const assetPairs = getAssetPairs([
+    {
+      fromAsset: 'JPY',
+      toAsset: 'USD',
+      key: 'fJPY',
+    },
+    {
+      fromAsset: 'EUR',
+      toAsset: 'USD',
+      key: 'fEUR',
+    },
+  ], deployed);
+
+  const config: PriceFeederConfig = {
+    web3Provider: process.env[envVars.WEB3_PROVIDER],
+    ethPrivateKey: process.env[envVars.ETH_PRIVATE_KEY],
+    oracleContractAddr,
+    assetPairs,
+    gasLimit: Number(process.env[envVars.GAS_LIMIT]),
+  };
+  const priceFeeder = new PriceFeeder(config);
+  priceFeeder.start();
+};
 
 export default startFeedingPrice;

@@ -2,16 +2,14 @@ import { createLogger, format, transports } from 'winston';
 import envVars from './envVars';
 
 const newLogger = () => {
-  const { combine, timestamp, printf } = format;
+  const { combine, timestamp: timestampFormat, printf } = format;
 
-  const customFormat = printf(({ level, message, timestamp }) => {
-    return `${timestamp} ${level}: ${message}`;
-  });
+  const customFormat = printf(({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`);
 
   const logger = createLogger({
     level: 'info',
     format: combine(
-      timestamp(),
+      timestampFormat(),
       customFormat,
     ),
     transports: [
@@ -21,7 +19,7 @@ const newLogger = () => {
       //
       new transports.File({ filename: 'error.log', level: 'error' }),
       new transports.File({ filename: 'combined.log' }),
-    ]
+    ],
   });
   if (process.env[envVars.NODE_ENV] !== 'prod') {
     logger.add(new transports.Console());

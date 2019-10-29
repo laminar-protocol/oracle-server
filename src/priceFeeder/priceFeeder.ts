@@ -4,15 +4,15 @@ import { Account } from 'web3-core';
 import logger from '../logger';
 import fetchPrice from './fetchPrice';
 import { AssetPair, AssetPairs } from './types';
-import OracleContract from "./oracleContract";
+import OracleContract from './oracleContract';
 
 export type PriceFeederConfig = {
-  web3Provider: string,
-  ethPrivateKey: string,
-  oracleContractAddr: string,
-  assetPairs: AssetPairs,
-  gasLimit: number,
-}
+  web3Provider: string;
+  ethPrivateKey: string;
+  oracleContractAddr: string;
+  assetPairs: AssetPairs;
+  gasLimit: number;
+};
 
 export default class PriceFeeder {
   private _web3: Web3;
@@ -33,14 +33,14 @@ export default class PriceFeeder {
   }
 
   public start = () => {
-    logger.info(`start feeding price...`);
+    logger.info('start feeding price...');
     logger.info('--------------------------');
     const feederInfo = {
       feederAddr: this._feederAccount.address,
       oracleAddr: this._oracleContract.addr(),
-      assetPairs: this._assetPairs.map(({key, keyAddr}) => `${key}: ${keyAddr}`).join(', '),
+      assetPairs: this._assetPairs.map(({ key, keyAddr }) => `${key}: ${keyAddr}`).join(', '),
       gasLimit: this._gasLimit,
-    }
+    };
     for (const [k, v] of Object.entries(feederInfo)) {
       logger.info(`${k}: ${v}`);
     }

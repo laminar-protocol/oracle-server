@@ -9,6 +9,7 @@
   "author": "Laminar Developers",
   "private": true,
   "dependencies": {
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "flow-protocol": "laminar-protocol/flow-protocol-ethereum",
     "node-fetch": "^2.6.0",

@@ -1,5 +1,5 @@
 const VARS = {
-  NODE_ENV: 'NODE_ENV', // 'prod' or 'dev'
+  CONSOLE_LOG: 'CONSOLE_LOG', // 'true' or 'false'
 
   ALPHA_VANTAGE_API_KEY: 'ALPHA_VANTAGE_API_KEY',
 

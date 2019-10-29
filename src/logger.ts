@@ -13,15 +13,13 @@ const newLogger = () => {
       customFormat,
     ),
     transports: [
-      //
       // - Write to all logs with level `info` and below to `combined.log`
       // - Write all logs error (and below) to `error.log`.
-      //
       new transports.File({ filename: 'error.log', level: 'error' }),
       new transports.File({ filename: 'combined.log' }),
     ],
   });
-  if (process.env[envVars.NODE_ENV] !== 'prod') {
+  if (process.env[envVars.CONSOLE_LOG] === 'true') {
     logger.add(new transports.Console());
   }
   return logger;

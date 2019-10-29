@@ -51,6 +51,7 @@ const startFeedingPrice = () => {
     oracleContractAddr,
     assetPairs,
     gasLimit: Number(process.env[envVars.GAS_LIMIT]),
+    intervalByMs: Number(process.env[envVars.PRICE_FEED_INTERVAL_MS]),
   };
   const priceFeeder = new PriceFeeder(config);
   priceFeeder.start();

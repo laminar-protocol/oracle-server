@@ -2,6 +2,7 @@ import Web3 from 'web3';
 import { Account } from 'web3-core';
 
 import logger from '../logger';
+import sleep from '../sleep';
 import fetchPrice from './fetchPrice';
 import { AssetPair, AssetPairs } from './types';
 import OracleContract from './oracleContract';
@@ -12,6 +13,7 @@ export type PriceFeederConfig = {
   oracleContractAddr: string;
   assetPairs: AssetPairs;
   gasLimit: number;
+  intervalByMs: number,
 };
 
 export default class PriceFeeder {
@@ -20,7 +22,7 @@ export default class PriceFeeder {
   private _oracleContract: OracleContract;
   private _assetPairs: AssetPairs;
   private _gasLimit: number;
-
+  private _intervalByMs: number;
   private _continue: boolean;
 
   constructor(config: PriceFeederConfig) {
@@ -29,6 +31,7 @@ export default class PriceFeeder {
     this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr);
     this._assetPairs = config.assetPairs;
     this._gasLimit = config.gasLimit;
+    this._intervalByMs = config.intervalByMs;
     this._continue = false;
   }
 
@@ -56,15 +59,17 @@ export default class PriceFeeder {
   };
 
   private _poll = async () => {
-    // while(this.continue) {
-    for (const assetPair of this._assetPairs) {
-      try {
-        await this._fetchAndFeedPrice(assetPair);
-      } catch (err) {
-        logger.error(`${err}`);
+    while(this._continue) {
+      for (const assetPair of this._assetPairs) {
+        try {
+          await this._fetchAndFeedPrice(assetPair);
+        } catch (err) {
+          logger.error(`${err}`);
+        }
       }
+      
+      await sleep(this._intervalByMs);
     }
-    // }
   };
 
   private _fetchAndFeedPrice = async ({ fromAsset, toAsset, key, keyAddr }: AssetPair) => {

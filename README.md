@@ -2,7 +2,7 @@
 
 ## Run
 
-You can start oracle server via `yarn start`, with some environment variables.
+To start an oracle server, use `yarn start`, with environment variables explained in the following part.
 
 ### Environment variables
 
@@ -18,3 +18,5 @@ For local testnet, additional environment variables would be needed:
 * `LOCAL_TESTNET_ORACLE_CONTRACT_ADDR`: the oracle contract address in local testnet.
 * `FJPY`: `fJPY` contract address.
 * `FEUR`: `fEUR` contract address.
+
+By default, logs would be saved in `error.log` and `combined.log`. To enable logging in console, set environment variable `CONSOLE_LOG` as `true`.

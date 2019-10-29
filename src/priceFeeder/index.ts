@@ -7,8 +7,7 @@ import PriceFeeder, { PriceFeederConfig } from './priceFeeder';
 const DEPLOYED_ORACLE_ADDR_KEY = 'oracle';
 
 const startFeedingPrice = () => {
-  const chain = process.env[envVars.CHAIN];
-  const deployed = (deployment as any)[chain];
+  const deployed = (deployment as any)[process.env[envVars.CHAIN]];
 
   const oracleContractAddr = deployed
     ? deployed[DEPLOYED_ORACLE_ADDR_KEY]
@@ -17,7 +16,7 @@ const startFeedingPrice = () => {
     throw new Error('no oracle contract addr');
   }
 
-  const assetPairs = [
+  const assetPairs = getAssetPairs([
     {
       fromAsset: 'JPY',
       toAsset: 'USD',
@@ -28,16 +27,15 @@ const startFeedingPrice = () => {
       toAsset: 'USD',
       key: 'fEUR',
     }
-  ];
+  ], deployed);
+
   const config: PriceFeederConfig = {
     web3Provider: process.env[envVars.WEB3_PROVIDER],
-    chain,
     ethPrivateKey: process.env[envVars.ETH_PRIVATE_KEY],
-    oracleContractAddr: process.env[envVars.LOCAL_TESTNET_ORACLE_CONTRACT_ADDR],
-    assetPairs: getAssetPairs(assetPairs, deployed),
+    oracleContractAddr,
+    assetPairs,
     gasLimit: Number(process.env[envVars.GAS_LIMIT]),
   };
-
   const priceFeeder = new PriceFeeder(config);
   priceFeeder.start();
 };

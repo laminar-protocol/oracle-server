@@ -7,7 +7,6 @@ import OracleContract from "./oracleContract";
 
 export type PriceFeederConfig = {
   web3Provider: string,
-  chain: string,
   ethPrivateKey: string,
   oracleContractAddr: string,
   assetPairs: AssetPairs,
@@ -16,20 +15,22 @@ export type PriceFeederConfig = {
 
 export default class PriceFeeder {
   private _web3: Web3;
-  private _chain: string;
   private _feederAccount: Account;
   private _oracleContract: OracleContract;
   private _assetPairs: AssetPairs;
+  private _gasLimit: number;
 
   private _continue: boolean;
 
   constructor(config: PriceFeederConfig) {
     this._web3 = new Web3(config.web3Provider);
-    this._chain = config.chain;
     this._feederAccount = this._web3.eth.accounts.privateKeyToAccount(config.ethPrivateKey);
-    this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr, config.gasLimit);
+    this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr);
     this._assetPairs = config.assetPairs;
+    this._gasLimit = config.gasLimit;
     this._continue = false;
+
+    console.log('start with config: ', JSON.stringify(config));
   }
 
   public start = () => {
@@ -57,21 +58,22 @@ export default class PriceFeeder {
   private _fetchAndFeedPrice = async ({ fromAsset, toAsset, keyAddr }: AssetPair) => {
     const price = await fetchPrice(fromAsset, toAsset);
     const callData = this._oracleContract.feedPriceEncoded(price, keyAddr);
+    const nonce = await this._web3.eth.getTransactionCount(this._feederAccount.address);
 
     const tx = {
       from: this._feederAccount.address,
       to: this._oracleContract.addr(),
+      nonce,
       data: callData,
-      // TODO: set max gas price
-      chain: this._chain,
+      gas: this._gasLimit,
     };
     const { rawTransaction } = await this._feederAccount.signTransaction(tx);
     try {
-      const { transactionHash } = await this._web3.eth.sendSignedTransaction(rawTransaction);
+      const receipt = await this._web3.eth.sendSignedTransaction(rawTransaction);
       // TODO: logger
-      console.log(`Feeding price success with tx hash: ${ transactionHash }`);
+      console.log(`Feeding price success: ${ JSON.stringify(receipt) }`);
     } catch (err) {
-      console.log(`Feeding price failed: ${ JSON.stringify(err) }`);
+      console.log(`Feeding price failed: ${ err }`);
     }
   };
 }

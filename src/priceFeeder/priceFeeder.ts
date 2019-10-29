@@ -1,6 +1,7 @@
 import Web3 from 'web3';
 import { Account } from 'web3-core';
 
+import logger from '../logger';
 import fetchPrice from './fetchPrice';
 import { AssetPair, AssetPairs } from './types';
 import OracleContract from "./oracleContract";
@@ -29,16 +30,28 @@ export default class PriceFeeder {
     this._assetPairs = config.assetPairs;
     this._gasLimit = config.gasLimit;
     this._continue = false;
-
-    console.log('start with config: ', JSON.stringify(config));
   }
 
   public start = () => {
+    logger.info(`start feeding price...`);
+    logger.info('--------------------------');
+    const feederInfo = {
+      feederAddr: this._feederAccount.address,
+      oracleAddr: this._oracleContract.addr(),
+      assetPairs: this._assetPairs.map(({key, keyAddr}) => `${key}: ${keyAddr}`).join(', '),
+      gasLimit: this._gasLimit,
+    }
+    for (const [k, v] of Object.entries(feederInfo)) {
+      logger.info(`${k}: ${v}`);
+    }
+    logger.info('--------------------------');
+
     this._continue = true;
     this._poll();
   };
 
   public stop = () => {
+    logger.info('stop feeding price...');
     this._continue = false;
   };
 
@@ -48,14 +61,13 @@ export default class PriceFeeder {
       try {
         await this._fetchAndFeedPrice(assetPair);
       } catch (err) {
-        // TODO: logger
-        console.log(err);
+        logger.error(`${err}`);
       }
     }
     // }
   };
 
-  private _fetchAndFeedPrice = async ({ fromAsset, toAsset, keyAddr }: AssetPair) => {
+  private _fetchAndFeedPrice = async ({ fromAsset, toAsset, key, keyAddr }: AssetPair) => {
     const price = await fetchPrice(fromAsset, toAsset);
     const callData = this._oracleContract.feedPriceEncoded(price, keyAddr);
     const nonce = await this._web3.eth.getTransactionCount(this._feederAccount.address);
@@ -69,11 +81,11 @@ export default class PriceFeeder {
     };
     const { rawTransaction } = await this._feederAccount.signTransaction(tx);
     try {
-      const receipt = await this._web3.eth.sendSignedTransaction(rawTransaction);
+      const { transactionHash } = await this._web3.eth.sendSignedTransaction(rawTransaction);
       // TODO: logger
-      console.log(`Feeding price success: ${ JSON.stringify(receipt) }`);
+      logger.info(`Feeding '${key}' price success, price ${price}, tx hash ${transactionHash}.`);
     } catch (err) {
-      console.log(`Feeding price failed: ${ err }`);
+      logger.error(`Feeding '${key}' price failed: ${err}.`);
     }
   };
 }

@@ -1,4 +1,6 @@
 const VARS = {
+  NODE_ENV: 'NODE_ENV', // 'prod' or 'dev'
+
   ALPHA_VANTAGE_API_KEY: 'ALPHA_VANTAGE_API_KEY',
 
   WEB3_PROVIDER: 'WEB3_PROVIDER',

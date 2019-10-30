@@ -1,5 +1,10 @@
 import { config as dotenvConfig } from "dotenv";
 
+const META_VARS = {
+  // use `.env` to load env vars by default, unless set as `false`
+  DOTENV: 'DOTENV',
+};
+
 const REQUIRED_VARS = {
   ALPHA_VANTAGE_API_KEY: 'ALPHA_VANTAGE_API_KEY',
   PRICE_FEED_INTERVAL_MS: 'PRICE_FEED_INTERVAL_MS', // by milliseconds
@@ -18,20 +23,22 @@ const LOCAL_TESTNET_VARS = {
   FEUR: 'LOCAL_TESTNET_FEUR_ADDR',
 };
 
-const VARS = { ...REQUIRED_VARS, ...LOCAL_TESTNET_VARS };
+const VARS = { ...META_VARS, ...REQUIRED_VARS, ...LOCAL_TESTNET_VARS };
 
 const configVars = () => {
-  // init dotenv
-  const result = dotenvConfig();
-  if (result.error) {
-    throw result.error;
+  // init dotenv if needed
+  if (process.env[VARS.DOTENV] !== 'false') {
+    const result = dotenvConfig();
+    if (result.error) {
+      throw result.error;
+    }
   }
 
   // check required vars
   Object.values(REQUIRED_VARS).forEach((varKey: string) => {
     const variable = process.env[varKey];
     if (variable === undefined) {
-      throw new Error(`no ${varKey} environment variable`)
+      throw new Error(`no ${varKey} environment variable`);
     }
   });
 };

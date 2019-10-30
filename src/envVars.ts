@@ -1,4 +1,4 @@
-import { config as dotenvConfig } from "dotenv";
+import { config as dotenvConfig } from 'dotenv';
 
 const META_VARS = {
   // use `.env` to load env vars by default, unless set as `false`

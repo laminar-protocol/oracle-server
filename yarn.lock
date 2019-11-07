@@ -2348,8 +2348,8 @@ flatted@^2.0.0:
   integrity sha512-a1hQMktqW9Nmqr5aktAux3JMNqaucxGcjtjWnZLHX7yyPCmlSV3M54nGYbqT8K+0GhF3NBgmJCc3ma+WOgX8Jg==
 
 flow-protocol@laminar-protocol/flow-protocol-ethereum:
-  version "0.0.1"
-  resolved "https://codeload.github.com/laminar-protocol/flow-protocol-ethereum/tar.gz/8cb67d0f3fd8e915c5adf7c228b17b64091ea9e5"
+  version "0.0.2"
+  resolved "https://codeload.github.com/laminar-protocol/flow-protocol-ethereum/tar.gz/d20c1cb8c26b6c632790a4f12b7900824bd83a9e"
 
 for-each@^0.3.3:
   version "0.3.3"

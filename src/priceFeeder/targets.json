@@ -1,0 +1,25 @@
+{
+    "assetPairs": [
+      {
+        "fromAsset": "JPY",
+        "toAsset": "USD",
+        "key": "fJPY"
+      },
+      {
+        "fromAsset": "EUR",
+        "toAsset": "USD",
+        "key": "fEUR"
+      },
+      {
+        "fromAsset": "XAU",
+        "toAsset": "USD",
+        "key": "fXAU"
+      }
+    ],
+    "stocks": [
+        {
+            "symbol": "AAPL",
+            "key": "fAAPL"
+        }
+    ]
+  }

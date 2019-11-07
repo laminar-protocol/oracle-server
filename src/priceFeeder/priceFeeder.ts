@@ -3,8 +3,8 @@ import { Account } from 'web3-core';
 
 import logger from '../logger';
 import sleep from '../sleep';
-import fetchPrice from './fetchPrice';
-import { AssetPair, AssetPairs } from './types';
+import { fetchCurrencyExPrice, fetchStockPrice } from './fetchPrice';
+import { AssetPairs, Stocks } from './types';
 import OracleContract from './oracleContract';
 
 export type PriceFeederConfig = {
@@ -12,6 +12,7 @@ export type PriceFeederConfig = {
   ethPrivateKey: string;
   oracleContractAddr: string;
   assetPairs: AssetPairs;
+  stocks: Stocks;
   gasLimit: number;
   intervalByMs: number;
 };
@@ -21,6 +22,7 @@ export default class PriceFeeder {
   private _feederAccount: Account;
   private _oracleContract: OracleContract;
   private _assetPairs: AssetPairs;
+  private _stocks: Stocks;
   private _gasLimit: number;
   private _intervalByMs: number;
   private _continue: boolean;
@@ -30,6 +32,7 @@ export default class PriceFeeder {
     this._feederAccount = this._web3.eth.accounts.privateKeyToAccount(config.ethPrivateKey);
     this._oracleContract = new OracleContract(this._web3, config.oracleContractAddr);
     this._assetPairs = config.assetPairs;
+    this._stocks = config.stocks;
     this._gasLimit = config.gasLimit;
     this._intervalByMs = config.intervalByMs;
     this._continue = false;
@@ -38,10 +41,15 @@ export default class PriceFeeder {
   public start = () => {
     logger.info('start feeding price...');
     logger.info('--------------------------');
+
+    const assetPairsStr = this._assetPairs.map(({ key, keyAddr }) => `${key}: ${keyAddr}`).join(', ');
+    const stocksStr = this._stocks.map(({ key, keyAddr }) => `${key}: ${keyAddr}`).join(', ');
     const feederInfo = {
+      intervalBySeconds: this._intervalByMs / 1000,
       feederAddr: this._feederAccount.address,
       oracleAddr: this._oracleContract.addr(),
-      assetPairs: this._assetPairs.map(({ key, keyAddr }) => `${key}: ${keyAddr}`).join(', '),
+      assetPairs: `[${assetPairsStr}]`,
+      stocks: `[${stocksStr}]`,
       gasLimit: this._gasLimit,
     };
     for (const [k, v] of Object.entries(feederInfo)) {
@@ -60,9 +68,19 @@ export default class PriceFeeder {
 
   private _poll = async () => {
     while (this._continue) {
-      for (const assetPair of this._assetPairs) {
+      for (const { fromAsset, toAsset, key, keyAddr } of this._assetPairs) {
         try {
-          await this._fetchAndFeedPrice(assetPair);
+          const price = await fetchCurrencyExPrice(fromAsset, toAsset);
+          await this._feedPrice(price, key, keyAddr);
+        } catch (err) {
+          logger.error(`${err}`);
+        }
+      }
+
+      for (const { symbol, key, keyAddr } of this._stocks) {
+        try {
+          const price = await fetchStockPrice(symbol);
+          await this._feedPrice(price, key, keyAddr);
         } catch (err) {
           logger.error(`${err}`);
         }
@@ -72,8 +90,7 @@ export default class PriceFeeder {
     }
   };
 
-  private _fetchAndFeedPrice = async ({ fromAsset, toAsset, key, keyAddr }: AssetPair) => {
-    const price = await fetchPrice(fromAsset, toAsset);
+  private _feedPrice = async (price: string, key: string, keyAddr: string) => {
     const callData = this._oracleContract.feedPriceEncoded(price, keyAddr);
     const nonce = await this._web3.eth.getTransactionCount(this._feederAccount.address);
 
@@ -92,5 +109,5 @@ export default class PriceFeeder {
     } catch (err) {
       logger.error(`Feeding '${key}' price failed: ${err}.`);
     }
-  };
+  }
 }

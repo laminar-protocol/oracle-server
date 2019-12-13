@@ -2349,7 +2349,7 @@ flatted@^2.0.0:
 
 flow-protocol@laminar-protocol/flow-protocol-ethereum:
   version "0.0.2"
-  resolved "https://codeload.github.com/laminar-protocol/flow-protocol-ethereum/tar.gz/d20c1cb8c26b6c632790a4f12b7900824bd83a9e"
+  resolved "https://codeload.github.com/laminar-protocol/flow-protocol-ethereum/tar.gz/6569fee7fc3ccb75596abb5267c0e0c82db95421"
 
 for-each@^0.3.3:
   version "0.3.3"

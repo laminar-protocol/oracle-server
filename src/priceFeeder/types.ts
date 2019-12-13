@@ -1,8 +1,8 @@
-export type AssetPair = { fromAsset: string; toAsset: string; key: string; keyAddr?: string };
-export type AssetPairs = Array<AssetPair>;
+export interface Listing {
+  symbol: string;
+  category: string;
+}
 
-// stocks with string symbol
-export type Stock = { symbol: string; key: string; keyAddr?: string };
-export type Stocks = Array<Stock>;
-
-export type Assets = AssetPair | Stock;
+export interface FeederKind {
+  feed: (price: string, listing: Listing) => Promise<void>;
+}

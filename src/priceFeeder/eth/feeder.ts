@@ -51,9 +51,9 @@ export class EthFeeder implements FeederKind {
 
     try {
       const { transactionHash } = await this.web3.eth.sendSignedTransaction(rawTransaction);
-      logger.info(`Feeding '${symbol}' price success, price ${price}, tx hash ${transactionHash}.`);
+      logger.info(`Feeding success '${symbol}', price ${price}, tx hash ${transactionHash}.`);
     } catch (err) {
-      logger.error(`Feeding '${symbol}' price failed: ${err}.`);
+      logger.error(`Feeding '${symbol}' failed: ${err}.`);
     }
   }
 

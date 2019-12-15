@@ -1,9 +1,7 @@
-import { config as dotenvConfig } from 'dotenv';
-
+import './env';
 import startFeedingPrice from './priceFeeder';
 
 const main = () => {
-  dotenvConfig();
   startFeedingPrice();
 
   // TODO: add monitoring

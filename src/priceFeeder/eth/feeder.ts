@@ -17,7 +17,7 @@ import symbolKeys from './symbolKeys.json';
 const deployedAddrs = (key: string): string => {
   const deployed = (deployment as any)[process.env.CHAIN];
   return deployed && deployed[key];
-}
+};
 
 const addrOfSymbol = (symbol: string): string => {
   const key: string = (symbolKeys as any)[symbol];
@@ -34,8 +34,8 @@ const withGasPrice = (tx: object): object => {
     return tx;
   }
   // 1 gwei for testnet
-  return { ...tx, gasPrice: web3Utils.toWei('1', 'gwei')};
-}
+  return { ...tx, gasPrice: web3Utils.toWei('1', 'gwei') };
+};
 
 /**
  * Feed price data to ETH oracle contract.

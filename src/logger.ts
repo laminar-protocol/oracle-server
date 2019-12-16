@@ -1,5 +1,4 @@
 import { createLogger, format, transports } from 'winston';
-import envVars from './envVars';
 
 const newLogger = () => {
   const { combine, timestamp: timestampFormat, printf } = format;
@@ -19,7 +18,7 @@ const newLogger = () => {
       new transports.File({ filename: 'combined.log' }),
     ],
   });
-  if (process.env[envVars.CONSOLE_LOG] === 'true') {
+  if (process.env.CONSOLE_LOG === 'true') {
     logger.add(new transports.Console());
   }
   return logger;

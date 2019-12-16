@@ -1,0 +1,6 @@
+[
+    { "symbol": "JPYUSD", "category": "forex" },
+    { "symbol": "EURUSD", "category": "forex" },
+    { "symbol": "XAUUSD", "category": "forex" },
+    { "symbol": "AAPL", "category": "stock" }
+]

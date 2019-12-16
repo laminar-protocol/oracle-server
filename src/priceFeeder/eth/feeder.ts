@@ -10,15 +10,32 @@ import logger from '../../logger';
 import { FeederKind, Listing } from '../types';
 import symbolKeys from './symbolKeys.json';
 
+/**
+ * Query a deployed address of a given key.
+ * @param key key of flow-protocl artifacts `deployement.json`, for instance `oracle`, `fEUR`.
+ */
+const deployedAddrs = (key: string): string => {
+  const deployed = (deployment as any)[process.env.CHAIN];
+  return deployed && deployed[key];
+}
+
 const addrOfSymbol = (symbol: string): string => {
   const key: string = (symbolKeys as any)[symbol];
   if (process.env.LOCAL === 'true') {
     return process.env[key.toUpperCase()];
   }
 
-  const deployed = (deployment as any)[process.env.CHAIN];
-  return deployed && deployed[key];
+  return deployedAddrs(key);
 };
+
+const withGasPrice = (tx: object): object => {
+  if (process.env.CHAIN === 'mainnet') {
+    // TODO: get mainnet gas price from gas station.
+    return tx;
+  }
+  // 1 gwei for testnet
+  return { ...tx, gasPrice: web3Utils.toWei('1', 'gwei')};
+}
 
 /**
  * Feed price data to ETH oracle contract.
@@ -40,13 +57,13 @@ export class EthFeeder implements FeederKind {
 
   public feed = async (price: string, { symbol }: Listing) => {
     const nonce = await this.web3.eth.getTransactionCount(this.account.address);
-    const tx = {
+    const tx = withGasPrice({
       from: this.account.address,
       to: this.oracleAddr,
       nonce,
       data: this.encodeCalldata(price, addrOfSymbol(symbol)),
       gas: this.gasLimit,
-    };
+    });
     const { rawTransaction } = await this.account.signTransaction(tx);
 
     try {
@@ -64,13 +81,14 @@ export class EthFeeder implements FeederKind {
   };
 }
 
+const ORACLE_KEY = 'oracle';
+
 const getOracleAddr = (): string => {
   if (process.env.LOCAL === 'true') {
     return process.env.LOCAL_TESTNET_ORACLE_CONTRACT_ADDR;
   }
 
-  const deployed = (deployment as any)[process.env.CHAIN];
-  return deployed && deployed.oracle;
+  return deployedAddrs(ORACLE_KEY);
 };
 
 export const newEthFeeder = (): EthFeeder => {

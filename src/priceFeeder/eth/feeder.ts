@@ -55,6 +55,8 @@ export class EthFeeder implements FeederKind {
     this.gasLimit = gasLimit;
   }
 
+  public setup = async (): Promise<void> => {};
+
   public feed = async (price: string, { symbol }: Listing) => {
     const nonce = await this.web3.eth.getTransactionCount(this.account.address);
     const tx = withGasPrice({

@@ -4,6 +4,8 @@ import { Listing, FeederKind } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+const loggerLabel = 'Poller';
+
 export default class Poller {
   private listings: Listing[];
   private feeder: FeederKind;
@@ -19,18 +21,16 @@ export default class Poller {
   }
 
   public start = () => {
-    logger.info('start feeding price...');
-    logger.info('--------------------------');
-    logger.info(`Interval by seconds: ${this.intervalByMs / 1000}`);
-    logger.info(`Listings: ${this.listings.map((l) => l.symbol).join(', ')}`);
-    logger.info('--------------------------');
+    logger.info({ label: loggerLabel, message: 'Start feeding price...' });
+    logger.info({ label: loggerLabel, message: `Interval by seconds: ${this.intervalByMs / 1000}` });
+    logger.info({ label: loggerLabel, message: `Listings: ${this.listings.map((l) => l.symbol).join(', ')}` });
 
     this.continue = true;
     this.poll();
   };
 
   public stop = () => {
-    logger.info('stop feeding price...');
+    logger.info({ label: loggerLabel, message: 'Stop feeding price' });
     this.continue = false;
   };
 
@@ -48,7 +48,7 @@ export default class Poller {
       const price = await fetchPrice(listing);
       await this.feeder.feed(price, listing);
     } catch (err) {
-      logger.error(`${err}`);
+      logger.error({ label: 'Fetch and feed', message: `${err}` });
     }
   };
 }

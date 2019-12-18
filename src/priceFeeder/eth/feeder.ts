@@ -37,6 +37,8 @@ const withGasPrice = (tx: object): object => {
   return { ...tx, gasPrice: web3Utils.toWei('1', 'gwei') };
 };
 
+const loggerLabel = 'EthFeeder';
+
 /**
  * Feed price data to ETH oracle contract.
  */
@@ -70,11 +72,11 @@ export class EthFeeder implements FeederKind {
 
     try {
       const { transactionHash } = await this.web3.eth.sendSignedTransaction(rawTransaction);
-      logger.info(`Feeding success '${symbol}', price ${price}, tx hash ${transactionHash}.`);
+      logger.info({ label: loggerLabel, message: `Tx successful '${symbol}': price ${price}, hash ${transactionHash}.` });
     } catch (err) {
-      logger.error(`Feeding '${symbol}' failed: ${err}.`);
+      logger.error({ label: loggerLabel, message: `Tx failed '${symbol}': ${err}.` });
     }
-  }
+  };
 
   private encodeCalldata = (price: string, keyAddr: string): string => {
     // big number doesn't work, use hex instead

@@ -2,8 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { WsProvider, HttpProvider } from '@polkadot/rpc-provider';
 import Keyring from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { stringToU8a } from '@polkadot/util';
-import BigNumber from 'bn.js';
+import BN from 'bignumber.js';
 
 import logger from '../../logger';
 import { FeederKind, Listing } from '../types';
@@ -19,11 +18,11 @@ const createProvider = (endpoint: string): WsProvider | HttpProvider => {
   return null;
 };
 
-const PRICE_ACCURACY = '1e+18';
+const PRICE_ACCURACY = new BN('1e+18');
 const withAccuracy = (rawPrice: string) =>
-  new BigNumber(rawPrice)
-    .mul(new BigNumber(PRICE_ACCURACY))
-    .toString();
+  new BN(rawPrice).multipliedBy(PRICE_ACCURACY).toString();
+
+const loggerLabel = 'SubstrateFeeder';
 
 export default class SubstrateFeeder implements FeederKind {
   private api: ApiPromise;
@@ -43,18 +42,18 @@ export default class SubstrateFeeder implements FeederKind {
       provider: this.provider,
       types: this.customTypes,
     });
-
     const keyring = new Keyring({ type: 'sr25519' });
-    this.account = keyring.addFromSeed(stringToU8a(this.keySeed));
+    // TODO: `addFromSeed`
+    this.account = keyring.addFromUri(this.keySeed);
   };
 
   public feed = async (price: string, { symbol }: Listing) => {
     const tx = this.api.tx.oracle.feedValue(symbol, withAccuracy(price));
     try {
       const txHash = await tx.signAndSend(this.account);
-      logger.info(`Tx sent successful: ${symbol} price ${price}, hash ${txHash}`);
+      logger.info({ label: loggerLabel, message: `Tx successful: ${symbol} price ${price}, hash ${txHash}` });
     } catch (err) {
-      logger.info(`Tx sent failed: ${err}`);
+      logger.error({ label: loggerLabel, message: `Tx failed ${symbol}: ${err}` });
     }
   };
 }

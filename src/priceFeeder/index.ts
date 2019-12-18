@@ -1,10 +1,8 @@
-import { types as acalaTypes } from '@acala-network/types';
-
 import Poller from './poller';
 import listings from './listings.json';
 import { FeederKind } from './types';
 import { newEthFeeder } from './eth/feeder';
-import { newSubstrateFeeder } from './substrate/feeder';
+import { newAcalaFeeder } from './acala/feeder';
 
 const startWithFeeder = async (feeder: FeederKind) => {
   await feeder.setup();
@@ -18,7 +16,7 @@ const startFeedingPrice = async () => {
   }
 
   if (process.env.FEED_ACALA === 'true') {
-    await startWithFeeder(newSubstrateFeeder(acalaTypes));
+    await startWithFeeder(newAcalaFeeder());
   }
 };
 

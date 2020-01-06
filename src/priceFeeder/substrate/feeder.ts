@@ -2,7 +2,7 @@ import { ApiPromise } from '@polkadot/api';
 import { WsProvider, HttpProvider } from '@polkadot/rpc-provider';
 import Keyring from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { stringToU8a } from '@polkadot/util';
+import { cryptoWaitReady } from '@polkadot/util-crypto';
 import BN from 'bignumber.js';
 
 import logger from '../../logger';
@@ -47,8 +47,9 @@ export default abstract class SubstrateFeeder implements FeederKind {
       provider: this.provider,
       types: this.customTypes,
     });
+    await cryptoWaitReady();
     const keyring = new Keyring({ type: 'sr25519' });
-    this.account = keyring.addFromSeed(stringToU8a(this.keySeed));
+    this.account = keyring.addFromUri(this.keySeed);
   };
 
   abstract oracleKeyFromListing(listing: Listing): any;

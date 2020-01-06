@@ -1,0 +1,6 @@
+[
+    { "symbol": "ACAUSD", "category": "forex" },
+    { "symbol": "USDUSD", "category": "forex" },
+    { "symbol": "DOTUSD", "category": "forex" },
+    { "symbol": "BTCUSD", "category": "forex" }
+]

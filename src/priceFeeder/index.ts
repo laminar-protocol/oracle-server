@@ -1,10 +1,11 @@
 import Poller from './poller';
-import listings from './listings.json';
-import { FeederKind } from './types';
+import { FeederKind, Listing } from './types';
 import { newEthFeeder } from './eth/feeder';
+import ethListings from './eth/listings.json';
 import { newAcalaFeeder } from './acala/feeder';
+import acalaListings from './acala/listings.json';
 
-const startWithFeeder = async (feeder: FeederKind) => {
+const startWithFeeder = async (feeder: FeederKind, listings: Listing[]) => {
   await feeder.setup();
   const poller = new Poller(listings, Number(process.env.PRICE_FEED_INTERVAL_MS), feeder);
   poller.start();
@@ -12,11 +13,11 @@ const startWithFeeder = async (feeder: FeederKind) => {
 
 const startFeedingPrice = async () => {
   if (process.env.FEED_ETH === 'true') {
-    await startWithFeeder(newEthFeeder());
+    await startWithFeeder(newEthFeeder(), ethListings);
   }
 
   if (process.env.FEED_ACALA === 'true') {
-    await startWithFeeder(newAcalaFeeder());
+    await startWithFeeder(newAcalaFeeder(), acalaListings);
   }
 };
 

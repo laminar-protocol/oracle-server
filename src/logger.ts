@@ -3,7 +3,7 @@ import { createLogger, format, transports } from 'winston';
 const newLogger = () => {
   const { combine, timestamp: timestampFormat, printf } = format;
 
-  const customFormat = printf(({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`);
+  const customFormat = printf(({ level, label, message, timestamp }) => `${timestamp} ${level}: [${label}] ${message}`);
 
   const logger = createLogger({
     level: 'info',

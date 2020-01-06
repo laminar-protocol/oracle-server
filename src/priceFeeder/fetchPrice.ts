@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import { Listing } from './types';
-import mockPrice from './mockPrice';
 
 // parse price string from a response
 type bodyParser = (body: any) => string | undefined | null;
@@ -35,9 +34,12 @@ const stockPrice = async (symbol: string): Promise<string> => {
 };
 
 const fetchPrice = (listing: Listing): Promise<string | null> => {
-  const mocked = mockPrice(listing.symbol);
-  if (mocked != null) {
-    return Promise.resolve(mocked);
+  // TODO: use real price
+  if (listing.symbol === 'DOTUSD') {
+    return forexPrice('ETH', 'USD');
+  }
+  if (listing.symbol === 'ACAUSD') {
+    return forexPrice('MKR', 'USD');
   }
 
   if (listing.category === 'forex') {

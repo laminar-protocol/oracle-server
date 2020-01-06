@@ -54,14 +54,19 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
   abstract oracleKeyFromListing(listing: Listing): any;
 
-  public feed = async (price: string, listing: Listing) => {
+  public feed = async (price: string, listing: Listing, nonce: number) => {
     try {
       const oracleKey = this.oracleKeyFromListing(listing);
       const tx: any = this.api.tx.oracle.feedValue(oracleKey, withAccuracy(price));
-      const txHash = await tx.signAndSend(this.account);
+      const txHash = await tx.signAndSend(this.account, { nonce });
       logger.info({ label: loggerLabel, message: `Tx successful: ${listing.symbol} price ${price}, hash ${txHash}` });
     } catch (err) {
       logger.error({ label: loggerLabel, message: `Tx failed ${listing.symbol}: ${err}` });
     }
   };
+
+  public nonce = async (): Promise<number> => {
+    const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
+    return nonceIndex.toNumber();
+  }
 }

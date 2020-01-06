@@ -5,5 +5,6 @@ export interface Listing {
 
 export interface FeederKind {
   setup: () => Promise<void>;
-  feed: (price: string, listing: Listing) => Promise<void>;
+  nonce: () => Promise<number>;
+  feed: (price: string, listing: Listing, nonce: number) => Promise<void>;
 }

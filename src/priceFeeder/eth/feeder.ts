@@ -59,8 +59,7 @@ export class EthFeeder implements FeederKind {
 
   public setup = async (): Promise<void> => {};
 
-  public feed = async (price: string, { symbol }: Listing) => {
-    const nonce = await this.web3.eth.getTransactionCount(this.account.address);
+  public feed = async (price: string, { symbol }: Listing, nonce: number) => {
     const tx = withGasPrice({
       from: this.account.address,
       to: this.oracleAddr,
@@ -77,6 +76,9 @@ export class EthFeeder implements FeederKind {
       logger.error({ label: loggerLabel, message: `Tx failed '${symbol}': ${err}.` });
     }
   };
+
+  public nonce = async (): Promise<number> =>
+    this.web3.eth.getTransactionCount(this.account.address);
 
   private encodeCalldata = (price: string, keyAddr: string): string => {
     // big number doesn't work, use hex instead

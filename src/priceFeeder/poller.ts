@@ -36,17 +36,24 @@ export default class Poller {
 
   private poll = async () => {
     while (this.continue) {
-      for (const listing of this.listings) {
-        await this.fetchThenFeed(listing);
+      let startingNonce: number;
+      try {
+        startingNonce = await this.feeder.nonce();
+      } catch (err) {
+        logger.error({ lable: loggerLabel, message: 'Fetching nonce failed.' });
+        continue; // eslint-disable-line
       }
+
+      await Promise.all(this.listings.map((listing, index) => this.fetchThenFeed(listing, startingNonce + index)));
+
       await sleep(this.intervalByMs);
     }
   };
 
-  private fetchThenFeed = async (listing: Listing) => {
+  private fetchThenFeed = async (listing: Listing, nonce: number) => {
     try {
       const price = await fetchPrice(listing);
-      await this.feeder.feed(price, listing);
+      await this.feeder.feed(price, listing, nonce);
     } catch (err) {
       logger.error({ label: 'Fetch and feed', message: `${err}` });
     }

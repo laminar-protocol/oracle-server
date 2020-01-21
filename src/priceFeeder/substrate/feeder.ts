@@ -24,7 +24,7 @@ const createProvider = (endpoint: string): WsProvider | HttpProvider => {
 
 const PRICE_ACCURACY = new BN('1e+18');
 const withAccuracy = (rawPrice: string) =>
-  new BN(rawPrice).multipliedBy(PRICE_ACCURACY).toString();
+  new BN(rawPrice).multipliedBy(PRICE_ACCURACY).toFixed();
 
 /**
  * Feed orml/oracle runtime module.

@@ -1,4 +1,4 @@
-import { ApiPromise } from '@polkadot/api';
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { WsProvider, HttpProvider } from '@polkadot/rpc-provider';
 import Keyring from '@polkadot/keyring';
 import { KeyringPair } from '@polkadot/keyring/types';
@@ -58,10 +58,31 @@ export default abstract class SubstrateFeeder implements FeederKind {
     try {
       const oracleKey = this.oracleKeyFromListing(listing);
       const tx: any = this.api.tx.oracle.feedValue(oracleKey, withAccuracy(price));
-      const txHash = await tx.signAndSend(this.account, { nonce });
-      logger.info({ label: loggerLabel, message: `Tx successful: ${listing.symbol} price ${price}, hash ${txHash}` });
+      const unsub = await tx.signAndSend(this.account, { nonce }, (result: SubmittableResult) => {
+        if (result.status.isFinalized) {
+          let extrinsicFailed = false;
+          result.events.forEach(({ event: { method, section } }) => {
+            if (section === 'system' && method === 'ExtrinsicFailed') {
+              extrinsicFailed = true;
+              logger.error({
+                label: loggerLabel,
+                message: `Feeding failed, block hash ${result.status.asFinalized}`,
+              });
+            }
+          });
+
+          if (!extrinsicFailed) {
+            logger.info({
+              label: loggerLabel,
+              message: `Feeding success: ${listing.symbol} price ${price}, block hash ${result.status.asFinalized}`,
+            });
+          }
+
+          unsub();
+        }
+      });
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Tx failed ${listing.symbol}: ${err}` });
+      logger.error({ label: loggerLabel, message: `Invalid tx ${listing.symbol}: ${err}` });
     }
   };
 

@@ -15,6 +15,7 @@
   "private": true,
   "dependencies": {
     "@acala-network/types": "^0.2.0-beta.9",
+    "@laminar/types": "^0.2.0-beta.7",
     "@polkadot/api": "^1.0.0-beta.8",
     "@polkadot/keyring": "^2.0.0-beta.4",
     "@polkadot/rpc-provider": "^1.0.0-beta.8",

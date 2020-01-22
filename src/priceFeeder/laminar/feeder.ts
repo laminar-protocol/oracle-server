@@ -1,5 +1,5 @@
 import { types as laminarTypes } from '@laminar/types';
-import { CurrencyId } from '@acala-network/types/interfaces';
+import { CurrencyId } from '@laminar/types/interfaces';
 
 import { Listing } from '../types';
 import currencyIds from './currencyIds.json';

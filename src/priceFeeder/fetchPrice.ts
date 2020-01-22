@@ -41,9 +41,6 @@ const fetchPrice = (listing: Listing): Promise<string | null> => {
   if (listing.symbol === 'ACAUSD') {
     return forexPrice('MKR', 'USD');
   }
-  if (listing.symbol === 'LAMUSD') {
-    return forexPrice('ETH', 'USD');
-  }
 
   if (listing.category === 'forex') {
     const from = listing.symbol.substr(0, 3);

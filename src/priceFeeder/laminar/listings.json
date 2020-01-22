@@ -1,0 +1,5 @@
+[
+    { "symbol": "USDUSD", "category": "forex" },
+    { "symbol": "EURUSD", "category": "forex" },
+    { "symbol": "JPYUSD", "category": "forex" }
+]

@@ -1,5 +1,5 @@
 {
-    "USDUSD": "1",
-    "EURUSD": "2",
-    "JPYUSD": "3"
+    "USDUSD": "AUSD",
+    "EURUSD": "FEUR",
+    "JPYUSD": "FJPY"
 }

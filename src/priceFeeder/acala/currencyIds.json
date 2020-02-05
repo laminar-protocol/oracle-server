@@ -1,6 +1,6 @@
 {
-    "ACAUSD": "0",
-    "USDUSD": "1",
-    "DOTUSD": "2",
-    "BTCUSD": "3"
+    "ACAUSD": "ACA",
+    "USDUSD": "AUSD",
+    "DOTUSD": "DOT",
+    "BTCUSD": "XBTC"
 }

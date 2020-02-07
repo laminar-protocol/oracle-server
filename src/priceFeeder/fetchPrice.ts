@@ -36,7 +36,7 @@ const stockPrice = async (symbol: string): Promise<string> => {
 const fetchPrice = (listing: Listing): Promise<string | null> => {
   // TODO: use real price
   if (listing.symbol === 'DOTUSD') {
-    return forexPrice('ETH', 'USD');
+    return Promise.resolve('300.0');
   }
   if (listing.symbol === 'ACAUSD') {
     return forexPrice('MKR', 'USD');

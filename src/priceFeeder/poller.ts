@@ -34,6 +34,11 @@ export default class Poller {
     this.continue = false;
   };
 
+  public resume = () => {
+    logger.info({ label: loggerLabel, message: 'Resume feeding price' });
+    this.continue = true;
+  }
+
   private poll = async () => {
     while (this.continue) {
       let startingNonce: number;

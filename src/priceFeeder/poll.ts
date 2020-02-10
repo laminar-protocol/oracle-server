@@ -4,9 +4,9 @@ import { Listing, FeederKind, PollKind } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const loggerLabel = 'Poller';
+const loggerLabel = 'Poll';
 
-export default class Poller implements PollKind {
+export default class Poll implements PollKind {
   private listings: Listing[];
   private feeder: FeederKind;
 

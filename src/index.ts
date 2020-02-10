@@ -1,10 +1,10 @@
 import './env';
 import startFeedingPrice from './priceFeeder';
-import startApp from './app';
+import startApi from './api';
 
 const main = async () => {
-  const pollers = await startFeedingPrice();
-  startApp({ pollers });
+  const polls = await startFeedingPrice();
+  startApi({ polls });
 };
 
 main();

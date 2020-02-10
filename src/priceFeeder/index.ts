@@ -1,5 +1,5 @@
-import Poller from './poller';
-import { FeederKind, PollKind, Listing } from './types';
+import Poll from './poll';
+import { FeederKind, Polls, PollKind, Listing } from './types';
 import { newEthFeeder } from './eth/feeder';
 import ethListings from './eth/listings.json';
 import { newAcalaFeeder } from './acala/feeder';
@@ -9,31 +9,31 @@ import laminarListings from './laminar/listings.json';
 
 const startWithFeeder = async (feeder: FeederKind, listings: Listing[]): Promise<PollKind> => {
   await feeder.setup();
-  const poller = new Poller(listings, Number(process.env.PRICE_FEED_INTERVAL_MS), feeder);
-  poller.start();
+  const poll = new Poll(listings, Number(process.env.PRICE_FEED_INTERVAL_MS), feeder);
+  poll.start();
 
-  return poller;
+  return poll;
 };
 
-const startFeedingPrice = async (): Promise<PollKind[]> => {
-  const pollers = [];
+const startFeedingPrice = async (): Promise<Polls> => {
+  const polls = new Map();
 
   if (process.env.FEED_ETH === 'true') {
-    const ethPoller = await startWithFeeder(newEthFeeder(), ethListings);
-    pollers.push(ethPoller);
+    const ethPoll = await startWithFeeder(newEthFeeder(), ethListings);
+    polls.set('eth', ethPoll);
   }
 
   if (process.env.FEED_ACALA === 'true') {
-    const acalaPoller = await startWithFeeder(newAcalaFeeder(), acalaListings);
-    pollers.push(acalaPoller);
+    const acalaPoll = await startWithFeeder(newAcalaFeeder(), acalaListings);
+    polls.set('acala', acalaPoll);
   }
 
   if (process.env.FEED_LAMINAR === 'true') {
-    const laminarPoller = await startWithFeeder(newLaminarFeeder(), laminarListings);
-    pollers.push(laminarPoller);
+    const laminarPoll = await startWithFeeder(newLaminarFeeder(), laminarListings);
+    polls.set('laminar', laminarPoll);
   }
 
-  return pollers;
+  return polls;
 };
 
 export default startFeedingPrice;

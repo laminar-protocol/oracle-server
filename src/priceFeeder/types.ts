@@ -14,3 +14,5 @@ export interface PollKind {
   stop: () => void;
   summary: () => any;
 }
+
+export type Polls = Map<string, PollKind>;

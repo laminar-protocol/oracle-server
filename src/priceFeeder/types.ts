@@ -8,3 +8,9 @@ export interface FeederKind {
   nonce: () => Promise<number>;
   feed: (price: string, listing: Listing, nonce: number) => Promise<void>;
 }
+
+export interface PollKind {
+  start: () => void;
+  stop: () => void;
+  summary: () => any;
+}

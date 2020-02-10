@@ -1,12 +1,12 @@
 import logger from '../logger';
 import fetchPrice from './fetchPrice';
-import { Listing, FeederKind } from './types';
+import { Listing, FeederKind, PollKind } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const loggerLabel = 'Poller';
 
-export default class Poller {
+export default class Poller implements PollKind {
   private listings: Listing[];
   private feeder: FeederKind;
 
@@ -34,10 +34,11 @@ export default class Poller {
     this.continue = false;
   };
 
-  public resume = () => {
-    logger.info({ label: loggerLabel, message: 'Resume feeding price' });
-    this.continue = true;
-  }
+  public summary = (): any => ({
+    isRunning: this.continue,
+    listings: this.listings,
+    intervalByMs: this.intervalByMs,
+  });
 
   private poll = async () => {
     while (this.continue) {

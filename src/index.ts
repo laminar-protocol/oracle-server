@@ -1,10 +1,10 @@
 import './env';
 import startFeedingPrice from './priceFeeder';
+import startApp from './app';
 
-const main = () => {
-  startFeedingPrice();
-
-  // TODO: add monitoring
+const main = async () => {
+  const pollers = await startFeedingPrice();
+  startApp({ pollers });
 };
 
 main();

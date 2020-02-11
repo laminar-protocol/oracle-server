@@ -7,7 +7,7 @@ import logger from '../logger';
 import createRouter from './routes';
 
 const app = express();
-const port = 3000;
+const port = process.env.API_PORT || 3000;
 const { API_KEY } = process.env;
 
 interface AppConfig {

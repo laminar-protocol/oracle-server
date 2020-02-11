@@ -9,9 +9,10 @@ export default class PollsController {
     this.polls = polls;
   }
 
-  private summary = (): any => ({
-    polls: Array.from(this.polls.values()).map((p) => p.summary()),
-  });
+  private summary = (): any => {
+    const summaries = Array.from(this.polls).map(([k, p]) => [k, p.summary()]);
+    return Object.fromEntries(summaries);
+  };
 
   private guardNotFound = (req: Request, res: Response): PollKind | null => {
     const { poll: key } = req.params;

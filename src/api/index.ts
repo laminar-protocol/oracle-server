@@ -13,7 +13,7 @@ interface AppConfig {
   polls: Polls;
 }
 
-const loggerLabel = 'App';
+const loggerLabel = 'Api';
 
 const startApi = (config: AppConfig) => {
   app.use(bodyParser.json());
@@ -22,7 +22,7 @@ const startApi = (config: AppConfig) => {
   const { polls } = config;
   app.use('/api/v1', createRouter(polls));
 
-  app.listen(port, () => logger.info({ label: loggerLabel, message: 'app running...' }));
+  app.listen(port, () => logger.info({ label: loggerLabel, message: 'Api server running...' }));
 };
 
 export default startApi;

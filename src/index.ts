@@ -4,10 +4,7 @@ import startApi from './api';
 
 const main = async () => {
   const polls = await startFeedingPrice();
-
-  if (process.env.WITH_API === 'true') {
-    startApi({ polls });
-  }
+  startApi({ polls });
 };
 
 main();

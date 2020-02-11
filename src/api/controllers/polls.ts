@@ -25,26 +25,34 @@ export default class PollsController {
     return poll;
   }
 
+  private guardInvalidAction = (req: Request, res: Response): string | null => {
+    const action = req.body && req.body.action;
+    if (action === 'start' || action === 'stop') {
+      return action;
+    }
+
+    res.status(400).send({ error: 'Invalid action.' });
+    return null;
+  }
+
   public get = (req: Request, res: Response) => {
     res.send(this.summary());
   }
 
   public patch = (req: Request, res: Response) => {
-    const { action } = req.body;
+    const action = this.guardInvalidAction(req, res);
+    if (action == null) {
+      return;
+    }
 
     if (action === 'start') {
       this.polls.forEach((p) => p.start());
-      this.get(req, res);
-      return;
     }
-
     if (action === 'stop') {
       this.polls.forEach((p) => p.stop());
-      this.get(req, res);
-      return;
     }
 
-    res.status(400).send({ error: 'Invalid action.' });
+    this.get(req, res);
   }
 
   public getOne = (req: Request, res: Response) => {
@@ -62,20 +70,18 @@ export default class PollsController {
       return;
     }
 
-    const { action } = req.body;
+    const action = this.guardInvalidAction(req, res);
+    if (action == null) {
+      return;
+    }
 
     if (action === 'start') {
       poll.start();
-      res.send(poll.summary());
-      return;
     }
-
     if (action === 'stop') {
       poll.stop();
-      res.send(poll.summary());
-      return;
     }
 
-    res.status(400).send({ error: 'Invalid action.' });
+    res.send(poll.summary());
   }
 }

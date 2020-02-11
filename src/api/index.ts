@@ -7,7 +7,7 @@ import logger from '../logger';
 import createRouter from './routes';
 
 const app = express();
-const port = process.env.API_PORT || 3000;
+const port = process.env.PORT || 3000;
 const { API_KEY } = process.env;
 
 interface AppConfig {
@@ -27,20 +27,23 @@ const apiKeyGuard = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const startApi = (config: AppConfig) => {
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: false }));
+  try {
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: false }));
 
-  if (API_KEY == null) {
-    logger.error({ label: loggerLabel, message: 'Can not run api server: API_KEY not set.' });
-    return;
+    if (API_KEY == null) {
+      throw new Error('API_KEY not set.');
+    }
+
+    app.use(apiKeyGuard);
+
+    const { polls } = config;
+    app.use('/api/v1', createRouter(polls));
+
+    app.listen(port, () => logger.info({ label: loggerLabel, message: 'Api server running...' }));
+  } catch (err) {
+    logger.error({ label: loggerLabel, message: `Starting api server failed: ${err}` });
   }
-
-  app.use(apiKeyGuard);
-
-  const { polls } = config;
-  app.use('/api/v1', createRouter(polls));
-
-  app.listen(port, () => logger.info({ label: loggerLabel, message: 'Api server running...' }));
 };
 
 export default startApi;

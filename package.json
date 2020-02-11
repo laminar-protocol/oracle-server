@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "engines": {
     "yarn": "1.x",
-    "node": ">=12"
+    "node": "12.x"
   },
   "scripts": {
     "start": "node dist/index.js",

@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 import { Polls } from '../priceFeeder/types';
 import logger from '../logger';
 
-import createRoute from './routes';
+import createRouter from './routes';
 
 const app = express();
 const port = 3000;
@@ -20,7 +20,7 @@ const startApi = (config: AppConfig) => {
   app.use(bodyParser.urlencoded({ extended: false }));
 
   const { polls } = config;
-  app.use('/api/v1', createRoute(polls));
+  app.use('/api/v1', createRouter(polls));
 
   app.listen(port, () => logger.info({ label: loggerLabel, message: 'app running...' }));
 };

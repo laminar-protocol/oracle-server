@@ -2,11 +2,12 @@
 
 ## Prerequisite
 
-Install [NodeJS](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/).
+Install [Node.js](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/).
+- Ensure that you have a LTS Node.js installed, with version `>=12.0`.
 
 ## Run
 
-To start an oracle server, use `yarn start`, with environment variables explained in the following part.
+To start an oracle server, use `yarn start`, with environment variables explained in the following section.
 
 ### Environment variables
 
@@ -39,3 +40,9 @@ For local testnet, additional environment variables would be needed:
 * `SUB_ENDPOINT`: node endpoint, could be `http`/`https` or `ws`/`wss`.
 
 For Laminar Chain, set `FEED_LAMINAR` as `true`; For Acala Network, set `FEED_ACALA` as `true`.
+
+#### API Server
+
+With `API_KEY` set, an API server would be spinned up for querying and modifying oracle server states.
+
+The default port number would be `3000`, to use a different one, set the `API_PORT` env variable.

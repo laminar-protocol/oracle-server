@@ -3,11 +3,13 @@
 ## Prerequisite
 
 Install [Node.js](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/).
-- Ensure that you have a LTS Node.js installed, with version `>=12.0`.
+- Ensure that you have a LTS Node.js installed, with version `12.x`.
 
 ## Run
 
-To start an oracle server, use `yarn start`, with environment variables explained in the following section.
+To start an oracle server
+1. Use `yarn build` to build the project.
+2. Use `yarn start`, with environment variables explained in the following section.
 
 ### Environment variables
 

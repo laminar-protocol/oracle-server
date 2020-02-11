@@ -47,4 +47,4 @@ For Laminar Chain, set `FEED_LAMINAR` as `true`; For Acala Network, set `FEED_AC
 
 With `API_KEY` set, an API server would be spinned up for querying and modifying oracle server states.
 
-The default port number would be `3000`, to use a different one, set the `PORT` env variable.
+The default port number would be `3000`, to use a different one, set the `API_PORT` env variable.

@@ -54,10 +54,14 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
   abstract oracleKeyFromListing(listing: Listing): any;
 
-  public feed = async (price: string, listing: Listing, nonce: number) => {
+  public feed = async (prices: string[], listings: Listing[], nonce: number): Promise<void> => {
     try {
-      const oracleKey = this.oracleKeyFromListing(listing);
-      const tx: any = this.api.tx.oracle.feedValue(oracleKey, withAccuracy(price));
+      const zipped = prices.map((p, i) => [
+        this.oracleKeyFromListing(listings[i]),
+        withAccuracy(p),
+      ]);
+      const tx: any = this.api.tx.oracle.feedValues(zipped);
+
       const unsub = await tx.signAndSend(this.account, { nonce }, (result: SubmittableResult) => {
         if (result.status.isFinalized) {
           let extrinsicFailed = false;
@@ -72,9 +76,10 @@ export default abstract class SubstrateFeeder implements FeederKind {
           });
 
           if (!extrinsicFailed) {
+            const summary = listings.map((l, i) => `${l.symbol} ${prices[i]}`).join(', ');
             logger.info({
               label: loggerLabel,
-              message: `Feeding success: ${listing.symbol} price ${price}, block hash ${result.status.asFinalized}`,
+              message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`,
             });
           }
 
@@ -82,7 +87,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
         }
       });
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Invalid tx ${listing.symbol}: ${err}` });
+      logger.error({ label: loggerLabel, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
   };
 

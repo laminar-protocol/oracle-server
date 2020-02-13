@@ -5,8 +5,7 @@ export interface Listing {
 
 export interface FeederKind {
   setup: () => Promise<void>;
-  nonce: () => Promise<number>;
-  feed: (prices: string[], listings: Listing[], nonce: number) => Promise<void>;
+  feed: (prices: string[], listings: Listing[]) => Promise<void>;
 }
 
 export interface PollKind {

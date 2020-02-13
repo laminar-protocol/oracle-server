@@ -42,26 +42,17 @@ export default class Poll implements PollKind {
 
   private poll = async () => {
     while (this.continue) {
-      let nonce: number;
-      try {
-        nonce = await this.feeder.nonce();
-      } catch (err) {
-        logger.error({ lable: loggerLabel, message: 'Fetching nonce failed.' });
-        continue; // eslint-disable-line
-      }
-
-      await this.fetchThenFeed(nonce);
-
+      await this.fetchThenFeed();
       await sleep(this.intervalByMs);
     }
   };
 
-  private fetchThenFeed = async (nonce: number) => {
+  private fetchThenFeed = async () => {
     try {
       const prices = await Promise.all(this.listings.map((l) => fetchPrice(l)));
-      await this.feeder.feed(prices, this.listings, nonce);
+      await this.feeder.feed(prices, this.listings);
     } catch (err) {
-      logger.error({ label: 'Fetch and feed', message: `${err}` });
+      logger.error({ label: loggerLabel, message: `Fetch then feed failed: ${err}` });
     }
   };
 }

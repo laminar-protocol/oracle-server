@@ -77,10 +77,15 @@ export class EthFeeder implements FeederKind {
     }
   };
 
-  public nonce = async (): Promise<number> =>
-    this.web3.eth.getTransactionCount(this.account.address);
+  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
+    let nonce: number;
+    try {
+      nonce = await this.web3.eth.getTransactionCount(this.account.address);
+    } catch (err) {
+      logger.error({ label: loggerLabel, message: `Getting nonce failed: ${err}.` });
+      return;
+    }
 
-  public feed = async (prices: string[], listings: Listing[], nonce: number): Promise<void> => {
     await Promise.all(
       prices.map((price, i) => {
         const listing = listings[i];

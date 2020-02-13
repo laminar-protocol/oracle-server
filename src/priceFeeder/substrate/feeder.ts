@@ -54,14 +54,23 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
   abstract oracleKeyFromListing(listing: Listing): any;
 
-  public feed = async (prices: string[], listings: Listing[], nonce: number): Promise<void> => {
+  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
+    let nonce: number;
     try {
-      const zipped = prices.map((p, i) => [
-        this.oracleKeyFromListing(listings[i]),
-        withAccuracy(p),
-      ]);
-      const tx: any = this.api.tx.oracle.feedValues(zipped);
+      const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
+      nonce = nonceIndex.toNumber();
+    } catch (err) {
+      logger.error({ label: loggerLabel, message: `Getting nonce failed ${err}` });
+      return;
+    }
 
+    const zipped = prices.map((p, i) => [
+      this.oracleKeyFromListing(listings[i]),
+      withAccuracy(p),
+    ]);
+    const tx: any = this.api.tx.oracle.feedValues(zipped);
+
+    try {
       const unsub = await tx.signAndSend(this.account, { nonce }, (result: SubmittableResult) => {
         if (result.status.isFinalized) {
           let extrinsicFailed = false;
@@ -90,9 +99,4 @@ export default abstract class SubstrateFeeder implements FeederKind {
       logger.error({ label: loggerLabel, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
   };
-
-  public nonce = async (): Promise<number> => {
-    const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
-    return nonceIndex.toNumber();
-  }
 }

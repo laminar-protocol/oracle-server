@@ -4,7 +4,7 @@ import { Listing, FeederKind, PollKind } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const loggerLabel = 'Poll';
+const label = 'Poll';
 
 export default class Poll implements PollKind {
   private listings: Listing[];
@@ -21,16 +21,16 @@ export default class Poll implements PollKind {
   }
 
   public start = () => {
-    logger.info({ label: loggerLabel, message: 'Start feeding price...' });
-    logger.info({ label: loggerLabel, message: `Interval by seconds: ${this.intervalByMs / 1000}` });
-    logger.info({ label: loggerLabel, message: `Listings: ${this.listings.map((l) => l.symbol).join(', ')}` });
+    logger.info({ label, message: 'Start feeding price...' });
+    logger.info({ label, message: `Interval by seconds: ${this.intervalByMs / 1000}` });
+    logger.info({ label, message: `Listings: ${this.listings.map((l) => l.symbol).join(', ')}` });
 
     this.continue = true;
     this.poll();
   };
 
   public stop = () => {
-    logger.info({ label: loggerLabel, message: 'Stop feeding price' });
+    logger.info({ label, message: 'Stop feeding price' });
     this.continue = false;
   };
 
@@ -52,7 +52,7 @@ export default class Poll implements PollKind {
       const prices = await Promise.all(this.listings.map((l) => fetchPrice(l)));
       await this.feeder.feed(prices, this.listings);
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Fetch then feed failed: ${err}` });
+      logger.error({ label, message: `Fetch then feed failed: ${err}` });
     }
   };
 }

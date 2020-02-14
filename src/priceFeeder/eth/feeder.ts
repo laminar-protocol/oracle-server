@@ -37,7 +37,7 @@ const withGasPrice = (tx: object): object => {
   return { ...tx, gasPrice: web3Utils.toWei('1', 'gwei') };
 };
 
-const loggerLabel = 'EthFeeder';
+const label = 'EthFeeder';
 
 /**
  * Feed price data to ETH oracle contract.
@@ -71,9 +71,9 @@ export class EthFeeder implements FeederKind {
 
     try {
       const { transactionHash } = await this.web3.eth.sendSignedTransaction(rawTransaction);
-      logger.info({ label: loggerLabel, message: `Tx successful '${symbol}': price ${price}, hash ${transactionHash}.` });
+      logger.info({ label, message: `Tx successful '${symbol}': price ${price}, hash ${transactionHash}.` });
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Tx failed '${symbol}': ${err}.` });
+      logger.error({ label, message: `Tx failed '${symbol}': ${err}.` });
     }
   };
 
@@ -82,7 +82,7 @@ export class EthFeeder implements FeederKind {
     try {
       nonce = await this.web3.eth.getTransactionCount(this.account.address);
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Getting nonce failed: ${err}.` });
+      logger.error({ label, message: `Getting nonce failed: ${err}.` });
       return;
     }
 

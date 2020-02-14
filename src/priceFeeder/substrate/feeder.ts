@@ -8,7 +8,7 @@ import BN from 'bignumber.js';
 import logger from '../../logger';
 import { FeederKind, Listing } from '../types';
 
-const loggerLabel = 'SubstrateFeeder';
+const label = 'SubstrateFeeder';
 
 const createProvider = (endpoint: string): WsProvider | HttpProvider => {
   if (endpoint.startsWith('ws')) {
@@ -18,7 +18,7 @@ const createProvider = (endpoint: string): WsProvider | HttpProvider => {
     return new HttpProvider(endpoint);
   }
 
-  logger.error({ label: loggerLabel, message: `Invalid endpoint: ${endpoint}` });
+  logger.error({ label, message: `Invalid endpoint: ${endpoint}` });
   return null;
 };
 
@@ -60,7 +60,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
       const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
       nonce = nonceIndex.toNumber();
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Getting nonce failed ${err}` });
+      logger.error({ label, message: `Getting nonce failed ${err}` });
       return;
     }
 
@@ -78,7 +78,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
             if (section === 'system' && method === 'ExtrinsicFailed') {
               extrinsicFailed = true;
               logger.error({
-                label: loggerLabel,
+                label,
                 message: `Feeding failed, block hash ${result.status.asFinalized}`,
               });
             }
@@ -87,7 +87,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
           if (!extrinsicFailed) {
             const summary = listings.map((l, i) => `${l.symbol} ${prices[i]}`).join(', ');
             logger.info({
-              label: loggerLabel,
+              label,
               message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`,
             });
           }
@@ -96,7 +96,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
         }
       });
     } catch (err) {
-      logger.error({ label: loggerLabel, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
+      logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
   };
 }

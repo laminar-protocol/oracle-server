@@ -14,7 +14,7 @@ interface AppConfig {
   polls: Polls;
 }
 
-const loggerLabel = 'Api';
+const label = 'Api';
 
 const apiKeyGuard = (req: Request, res: Response, next: NextFunction) => {
   const { api_key: apiKey } = req.query;
@@ -40,9 +40,9 @@ const startApi = (config: AppConfig) => {
     const { polls } = config;
     app.use('/api/v1', createRouter(polls));
 
-    app.listen(port, () => logger.info({ label: loggerLabel, message: 'Api server running...' }));
+    app.listen(port, () => logger.info({ label, message: 'Api server running...' }));
   } catch (err) {
-    logger.error({ label: loggerLabel, message: `Starting api server failed: ${err}` });
+    logger.error({ label, message: `Starting api server failed: ${err}` });
   }
 };
 

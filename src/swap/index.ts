@@ -14,7 +14,12 @@ import fetchPrice from '../priceFeeder/fetchPrice';
 
 const label = 'Swap';
 
-const swapRatio = new BN('0.02');
+// if more than `ARBITRAGE_RATIO`, do swap; 2%
+const ARBITRAGE_RATIO = new BN('0.02');
+
+// supply more to cover exchange fee; 0.3%
+const EXCHANGE_FEE_RATIO = new BN('1.003');
+
 const BASE_CURRENCY_ID = 'AUSD';
 
 const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
@@ -26,24 +31,24 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
   const dexPrice = baseAmount.div(listingAmount);
 
   const gapRatio = price.minus(dexPrice).div(price).abs();
-  if (gapRatio.isLessThan(swapRatio)) {
+  if (gapRatio.isLessThan(ARBITRAGE_RATIO)) {
     return;
   }
 
   const constProduct = listingAmount.multipliedBy(baseAmount);
 
-  const newBaseAmount = constProduct.multipliedBy(price).squareRoot().integerValue();
-  const newListingAmount = constProduct.div(newBaseAmount).integerValue();
+  const newBaseAmount = constProduct.multipliedBy(price).squareRoot();
+  const newListingAmount = constProduct.div(newBaseAmount);
 
   let tx;
   // if dex price is low, buy listing; else sell listing.
   if (dexPrice < price) {
-    const supplyAmount = baseAmount.minus(newBaseAmount).toFixed();
-    const targetAmount = newListingAmount.minus(baseAmount).toFixed();
+    const supplyAmount = newBaseAmount.minus(baseAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
+    const targetAmount = listingAmount.minus(newListingAmount).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([BASE_CURRENCY_ID, supplyAmount], [currencyId, targetAmount]);
   } else {
-    const supplyAmount = newListingAmount.minus(baseAmount).toFixed();
-    const targetAmount = baseAmount.minus(newBaseAmount).toFixed();
+    const supplyAmount = newListingAmount.minus(listingAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
+    const targetAmount = baseAmount.minus(newBaseAmount).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([currencyId, supplyAmount], [BASE_CURRENCY_ID, targetAmount]);
   }
 

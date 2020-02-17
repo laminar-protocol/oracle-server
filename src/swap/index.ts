@@ -22,7 +22,13 @@ const EXCHANGE_FEE_RATIO = new BN('1.003');
 
 const BASE_CURRENCY_ID = 'AUSD';
 
+const SYMBOLS = ['ACAUSD', 'DOTUSD', 'BTCUSD'];
+
 const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
+  if (!SYMBOLS.includes(symbol)) {
+    return;
+  }
+
   const price = new BN(priceStr);
 
   const currencyId = (currencyIds as any)[symbol];

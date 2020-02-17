@@ -10,6 +10,9 @@ export default class LaminarFeeder extends SubstrateFeeder {
   oracleKeyFromListing({ symbol }: Listing): CurrencyId {
     return (currencyIds as any)[symbol];
   }
+
+  // eslint-disable-next-line class-methods-use-this
+  async onNewPrices(prices: string[], listings: Listing[], nonce: number) { return Promise.resolve(); }
 }
 
 export const newLaminarFeeder = () => {

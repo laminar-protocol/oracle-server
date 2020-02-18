@@ -12,7 +12,7 @@ const label = 'Swap';
 // if more than `ARBITRAGE_RATIO`, do swap; 2%
 const ARBITRAGE_RATIO = new BN('0.02');
 
-// supply more to cover exchange fee; 0.3%
+// expect less target amount to cover exchange fee (0.3%) and other slippage(0.1%)
 const SLIPPAGE_RATIO = new BN('0.996');
 
 const BASE_CURRENCY_ID = 'AUSD';

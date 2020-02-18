@@ -21,7 +21,9 @@ const SYMBOLS = ['ACAUSD', 'DOTUSD', 'BTCUSD'];
 
 const PRECISION = new BN('1000000000000000000');
 const withoutPrecision = (amount: string): string =>
-  new BN(amount).div(PRECISION).multipliedBy(10000).integerValue().div(10000).toFixed();
+  new BN(amount).div(PRECISION).multipliedBy(10000).integerValue()
+    .div(10000)
+    .toFixed();
 
 const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
   if (!SYMBOLS.includes(symbol)) {

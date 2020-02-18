@@ -13,7 +13,7 @@ const label = 'Swap';
 const ARBITRAGE_RATIO = new BN('0.02');
 
 // supply more to cover exchange fee; 0.3%
-const EXCHANGE_FEE_RATIO = new BN('1.003');
+const SLIPPAGE_RATIO = new BN('0.996');
 
 const BASE_CURRENCY_ID = 'AUSD';
 
@@ -50,14 +50,14 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   let tx;
   let swapSummary: string;
   // if dex price is low, buy listing; else sell listing.
-  if (dexPrice < price) {
-    const supplyAmount = newBaseAmount.minus(baseAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
-    const targetAmount = listingAmount.minus(newListingAmount).integerValue().toFixed();
+  if (dexPrice.isLessThan(price)) {
+    const supplyAmount = newBaseAmount.minus(baseAmount).integerValue().toFixed();
+    const targetAmount = listingAmount.minus(newListingAmount).multipliedBy(SLIPPAGE_RATIO).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([BASE_CURRENCY_ID, supplyAmount], [currencyId, targetAmount]);
     swapSummary = `Swap: supply ${withoutPrecision(supplyAmount)} ${BASE_CURRENCY_ID} for ${withoutPrecision(targetAmount)} ${currencyId}`;
   } else {
-    const supplyAmount = newListingAmount.minus(listingAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
-    const targetAmount = baseAmount.minus(newBaseAmount).integerValue().toFixed();
+    const supplyAmount = newListingAmount.minus(listingAmount).integerValue().toFixed();
+    const targetAmount = baseAmount.minus(newBaseAmount).multipliedBy(SLIPPAGE_RATIO).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([currencyId, supplyAmount], [BASE_CURRENCY_ID, targetAmount]);
     swapSummary = `Swap: supply ${withoutPrecision(supplyAmount)} ${currencyId} for ${withoutPrecision(targetAmount)} ${BASE_CURRENCY_ID}`;
   }

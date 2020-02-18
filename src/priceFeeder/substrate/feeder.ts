@@ -99,6 +99,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
       logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
 
+    // FIXME: refactor to decouple price feed and swap
     await this.onNewPrices(prices, listings, nonce + 1);
   };
 

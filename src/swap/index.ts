@@ -1,16 +1,11 @@
 import BN from 'bignumber.js';
 
-import { ApiPromise, WsProvider, SubmittableResult } from '@polkadot/api';
-import Keyring from '@polkadot/keyring';
+import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { types as acalaTypes } from '@acala-network/types';
 
 import logger from '../logger';
 import { Listing } from '../priceFeeder/types';
 import currencyIds from '../priceFeeder/acala/currencyIds.json';
-
-import fetchPrice from '../priceFeeder/fetchPrice';
 
 const label = 'Swap';
 
@@ -24,7 +19,11 @@ const BASE_CURRENCY_ID = 'AUSD';
 
 const SYMBOLS = ['ACAUSD', 'DOTUSD', 'BTCUSD'];
 
-const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
+const PRECISION = new BN('1000000000000000000');
+const withoutPrecision = (amount: string): string =>
+  new BN(amount).div(PRECISION).multipliedBy(10000).integerValue().div(10000).toFixed();
+
+const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
   if (!SYMBOLS.includes(symbol)) {
     return;
   }
@@ -38,8 +37,10 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
 
   const gapRatio = price.minus(dexPrice).div(price).abs();
   if (gapRatio.isLessThan(ARBITRAGE_RATIO)) {
+    logger.info({ label, message: `No need to swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
     return;
   }
+  logger.info({ label, message: `Swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
 
   const constProduct = listingAmount.multipliedBy(baseAmount);
 
@@ -47,15 +48,18 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
   const newListingAmount = constProduct.div(newBaseAmount);
 
   let tx;
+  let swapSummary: string;
   // if dex price is low, buy listing; else sell listing.
   if (dexPrice < price) {
     const supplyAmount = newBaseAmount.minus(baseAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
     const targetAmount = listingAmount.minus(newListingAmount).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([BASE_CURRENCY_ID, supplyAmount], [currencyId, targetAmount]);
+    swapSummary = `Swap: supply ${withoutPrecision(supplyAmount)} ${BASE_CURRENCY_ID} for ${withoutPrecision(targetAmount)} ${currencyId}`;
   } else {
     const supplyAmount = newListingAmount.minus(listingAmount).multipliedBy(EXCHANGE_FEE_RATIO).integerValue().toFixed();
     const targetAmount = baseAmount.minus(newBaseAmount).integerValue().toFixed();
     tx = api.tx.dex.swapCurrency([currencyId, supplyAmount], [BASE_CURRENCY_ID, targetAmount]);
+    swapSummary = `Swap: supply ${withoutPrecision(supplyAmount)} ${currencyId} for ${withoutPrecision(targetAmount)} ${BASE_CURRENCY_ID}`;
   }
 
   try {
@@ -67,7 +71,7 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
             extrinsicFailed = true;
             logger.error({
               label,
-              message: `Swap failed, block hash ${result.status.asFinalized}`,
+              message: `${swapSummary} failed, block hash ${result.status.asFinalized}`,
             });
           }
         });
@@ -75,7 +79,7 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
         if (!extrinsicFailed) {
           logger.info({
             label,
-            message: `Swap success: ${symbol}, block hash ${result.status.asFinalized}`,
+            message: `${swapSummary} success, block hash ${result.status.asFinalized}`,
           });
         }
 
@@ -83,29 +87,19 @@ const swap = async (api: ApiPromise, account: KeyringPair, priceStr: string, { s
       }
     });
   } catch (err) {
-    logger.error({ label, message: `Swap tx for ${symbol} failed: ${err}` });
+    logger.error({ label, message: `${swapSummary} failed: ${err}` });
+  }
+};
+
+const swap = async (api: ApiPromise, account: KeyringPair, priceStrs: string[], listings: Listing[], startingNonce: number): Promise<void> => {
+  for (const [i, p] of priceStrs.entries()) {
+    const listing = listings[i];
+    try {
+      await swapOne(api, account, p, listing, startingNonce + i);
+    } catch (err) {
+      logger.error({ label, message: `Swap ${listing.symbol} failed: ${err}` });
+    }
   }
 };
 
 export default swap;
-
-const test = async () => {
-  const btc: Listing = { category: 'forex', symbol: 'BTCUSD' };
-
-  const api = await ApiPromise.create({
-    provider: new WsProvider('wss://node-6632097881473671168.au.onfinality.cloud/ws'),
-    types: acalaTypes,
-  });
-  const priceStr = await fetchPrice(btc);
-
-  await cryptoWaitReady();
-  const keyring = new Keyring({ type: 'sr25519' });
-  const account = keyring.addFromUri('0x34ee7beb5884801bcc8e61f80cb5c0cecff356fda8bf159beaf2434b3ffcb982');
-
-  const nonceIndex = await api.query.system.accountNonce(account.address);
-  const nonce = nonceIndex.toNumber();
-
-  await swap(api, account, priceStr, btc, nonce);
-};
-
-test();

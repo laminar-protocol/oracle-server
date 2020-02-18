@@ -11,7 +11,7 @@ export default class LaminarFeeder extends SubstrateFeeder {
     return (currencyIds as any)[symbol];
   }
 
-  // eslint-disable-next-line class-methods-use-this
+  // eslint-disable-next-line
   async onNewPrices(prices: string[], listings: Listing[], nonce: number) { return Promise.resolve(); }
 }
 

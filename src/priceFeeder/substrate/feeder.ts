@@ -30,10 +30,10 @@ const withAccuracy = (rawPrice: string) =>
  * Feed orml/oracle runtime module.
  */
 export default abstract class SubstrateFeeder implements FeederKind {
-  private api: ApiPromise;
+  protected api: ApiPromise;
   private provider: WsProvider | HttpProvider;
   private keySeed: string;
-  private account: KeyringPair;
+  protected account: KeyringPair;
   private customTypes: Record<any, any>;
 
   constructor(endpoint: string, keySeed: string, customTypes: Record<any, any>) {
@@ -98,5 +98,10 @@ export default abstract class SubstrateFeeder implements FeederKind {
     } catch (err) {
       logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
+
+    // FIXME: refactor to decouple price feed and swap
+    await this.onNewPrices(prices, listings, nonce + 1);
   };
+
+  abstract onNewPrices(prices: string[], listings: Listing[], nonce: number): any;
 }

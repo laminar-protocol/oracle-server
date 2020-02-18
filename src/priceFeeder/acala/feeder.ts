@@ -5,10 +5,16 @@ import { Listing } from '../types';
 import currencyIds from './currencyIds.json';
 import SubstrateFeeder from '../substrate/feeder';
 
+import swap from '../../swap/index';
+
 export default class AcalaFeeder extends SubstrateFeeder {
   // eslint-disable-next-line class-methods-use-this
   oracleKeyFromListing({ symbol }: Listing): CurrencyId {
     return (currencyIds as any)[symbol];
+  }
+
+  async onNewPrices(prices: string[], listings: Listing[], nonce: number) {
+    await swap(this.api, this.account, prices, listings, nonce);
   }
 }
 

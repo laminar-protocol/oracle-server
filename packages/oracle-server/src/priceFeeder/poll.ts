@@ -1,5 +1,5 @@
 import logger from '../logger';
-import fetchPrice from './fetchPrice';
+import fetchPrice from '@orml/fetch-price';
 import { Listing, FeederKind, PollKind } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

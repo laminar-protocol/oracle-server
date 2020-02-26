@@ -52,7 +52,7 @@ export class EthFeeder implements FeederKind {
   constructor(web3Provider: string, privateKey: string, oracleAddr: string, gasLimit: number) {
     this.web3 = new Web3(web3Provider);
     this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
-    this.oracle = new this.web3.eth.Contract(simplePriceOracleAbi, oracleAddr);
+    this.oracle = new this.web3.eth.Contract(simplePriceOracleAbi as web3Utils.AbiItem[], oracleAddr);
     this.oracleAddr = oracleAddr;
     this.gasLimit = gasLimit;
   }

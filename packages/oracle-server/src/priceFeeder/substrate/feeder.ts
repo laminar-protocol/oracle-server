@@ -54,15 +54,26 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
   abstract oracleKeyFromListing(listing: Listing): any;
 
-  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
-    let nonce: number;
+  private nonce = async (): Promise<number | null> => {
     try {
-      const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
-      nonce = nonceIndex.toNumber();
+      if (this.api.query.system.account) {
+        const account: any = await this.api.query.system.account(this.account.address);
+        return account.nonce.toNumber();
+      }
+      if (this.api.query.system.accountNonce) {
+        const nonceIndex: any = await this.api.query.system.accountNonce(this.account.address);
+        return nonceIndex.toNumber();
+      }
+      return null;
     } catch (err) {
       logger.error({ label, message: `Getting nonce failed ${err}` });
-      return;
+      return null;
     }
+  }
+
+  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
+    const nonce = await this.nonce();
+    if (nonce == null) { return; }
 
     const zipped = prices.map((p, i) => [
       this.oracleKeyFromListing(listings[i]),

@@ -35,6 +35,11 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   const currencyId = (currencyIds as any)[symbol];
   const pool: any = await api.query.dex.liquidityPool(currencyId);
   const [listingAmount, baseAmount]: [BN, BN] = pool.map((x: any) => new BN(x.toString()));
+  if (listingAmount.isZero()) {
+    logger.info({ label, message: `No need to swap ${symbol}: zero listing amount.` });
+    return;
+  }
+
   const dexPrice = baseAmount.div(listingAmount);
 
   const gapRatio = price.minus(dexPrice).div(price).abs();

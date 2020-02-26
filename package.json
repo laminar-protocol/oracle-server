@@ -15,12 +15,7 @@
   "author": "Laminar Developers",
   "private": true,
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.5.0",
-    "@typescript-eslint/parser": "^2.5.0",
-    "eslint": "^6.5.1",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-import-resolver-typescript": "^2.0.0",
-    "eslint-plugin-import": "^2.18.2",
+    "@polkadot/dev": "^0.32.17",
     "jest": "^24.9.0",
     "lerna": "^3.20.2",
     "ts-jest": "^24.1.0",

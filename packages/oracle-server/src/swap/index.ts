@@ -78,7 +78,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
             extrinsicFailed = true;
             logger.error({
               label,
-              message: `${swapSummary} failed, block hash ${result.status.asFinalized}`,
+              message: `${swapSummary} failed, block hash ${result.status.asFinalized}`
             });
           }
         });
@@ -86,7 +86,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
         if (!extrinsicFailed) {
           logger.info({
             label,
-            message: `${swapSummary} success, block hash ${result.status.asFinalized}`,
+            message: `${swapSummary} success, block hash ${result.status.asFinalized}`
           });
         }
 

@@ -45,7 +45,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
   public setup = async () => {
     this.api = await ApiPromise.create({
       provider: this.provider,
-      types: this.customTypes,
+      types: this.customTypes
     });
     await cryptoWaitReady();
     const keyring = new Keyring({ type: 'sr25519' });
@@ -77,7 +77,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
     const zipped = prices.map((p, i) => [
       this.oracleKeyFromListing(listings[i]),
-      withAccuracy(p),
+      withAccuracy(p)
     ]);
     const tx: any = this.api.tx.oracle.feedValues(zipped);
 
@@ -90,7 +90,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
               extrinsicFailed = true;
               logger.error({
                 label,
-                message: `Feeding failed, block hash ${result.status.asFinalized}`,
+                message: `Feeding failed, block hash ${result.status.asFinalized}`
               });
             }
           });
@@ -99,7 +99,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
             const summary = listings.map((l, i) => `${l.symbol} ${prices[i]}`).join(', ');
             logger.info({
               label,
-              message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`,
+              message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`
             });
           }
 

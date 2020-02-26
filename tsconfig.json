@@ -3,6 +3,7 @@
         "esModuleInterop": true,
         "target": "es2019",
         "noImplicitAny": true,
+        "moduleResolution": "node",
         "baseUrl": ".",
         "paths": {
             "@orml/fetch-price": ["packages/fetch-price/src"],

@@ -2,7 +2,7 @@ import logger from '../logger';
 import fetchPrice from '@orml/fetch-price';
 import { Listing, FeederKind, PollKind } from './types';
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const label = 'Poll';
 
@@ -37,7 +37,7 @@ export default class Poll implements PollKind {
   public summary = (): any => ({
     isRunning: this.continue,
     listings: this.listings,
-    intervalByMs: this.intervalByMs,
+    intervalByMs: this.intervalByMs
   });
 
   private poll = async () => {

@@ -18,7 +18,6 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "flow-protocol": "laminar-protocol/flow-protocol-ethereum",
-    "rxjs": "^6.5.4",
     "web3": "^1.2.2",
     "web3-core": "^1.2.2",
     "web3-eth-contract": "^1.2.2",

@@ -5,9 +5,9 @@
   "author": "Laminar Developers",
   "private": true,
   "dependencies": {
-    "@orml/fetch-price": "^0.1.0-beta.1",
     "@acala-network/types": "beta",
     "@laminar/types": "beta",
+    "@orml/fetch-price": "^0.1.0-beta.1",
     "@polkadot/api": "beta",
     "@polkadot/keyring": "^2.5.1",
     "@polkadot/rpc-provider": "beta",

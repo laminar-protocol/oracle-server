@@ -1,5 +1,4 @@
 import fetch from 'node-fetch';
-import { Listing } from './types';
 
 // parse price string from a response
 type bodyParser = (body: any) => string | undefined | null;
@@ -33,7 +32,7 @@ const stockPrice = async (symbol: string): Promise<string> => {
   return getPrice(query, stockBodyParser);
 };
 
-const fetchPrice = (listing: Listing): Promise<string | null> => {
+const fetchPrice = (listing: { symbol: string; category: string }): Promise<string | null> => {
   // TODO: use real price
   if (listing.symbol === 'DOTUSD') {
     return Promise.resolve('300.0');

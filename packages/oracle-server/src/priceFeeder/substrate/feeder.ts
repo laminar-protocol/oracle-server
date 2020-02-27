@@ -45,7 +45,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
   public setup = async () => {
     this.api = await ApiPromise.create({
       provider: this.provider,
-      types: this.customTypes,
+      types: this.customTypes
     });
     await cryptoWaitReady();
     const keyring = new Keyring({ type: 'sr25519' });
@@ -54,19 +54,30 @@ export default abstract class SubstrateFeeder implements FeederKind {
 
   abstract oracleKeyFromListing(listing: Listing): any;
 
-  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
-    let nonce: number;
+  private nonce = async (): Promise<number | null> => {
     try {
-      const nonceIndex = await this.api.query.system.accountNonce(this.account.address);
-      nonce = nonceIndex.toNumber();
+      if (this.api.query.system.account) {
+        const account: any = await this.api.query.system.account(this.account.address);
+        return account.nonce.toNumber();
+      }
+      if (this.api.query.system.accountNonce) {
+        const nonceIndex: any = await this.api.query.system.accountNonce(this.account.address);
+        return nonceIndex.toNumber();
+      }
+      return null;
     } catch (err) {
       logger.error({ label, message: `Getting nonce failed ${err}` });
-      return;
+      return null;
     }
+  }
+
+  public feed = async (prices: string[], listings: Listing[]): Promise<void> => {
+    const nonce = await this.nonce();
+    if (nonce == null) { return; }
 
     const zipped = prices.map((p, i) => [
       this.oracleKeyFromListing(listings[i]),
-      withAccuracy(p),
+      withAccuracy(p)
     ]);
     const tx: any = this.api.tx.oracle.feedValues(zipped);
 
@@ -79,7 +90,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
               extrinsicFailed = true;
               logger.error({
                 label,
-                message: `Feeding failed, block hash ${result.status.asFinalized}`,
+                message: `Feeding failed, block hash ${result.status.asFinalized}`
               });
             }
           });
@@ -88,7 +99,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
             const summary = listings.map((l, i) => `${l.symbol} ${prices[i]}`).join(', ');
             logger.info({
               label,
-              message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`,
+              message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`
             });
           }
 

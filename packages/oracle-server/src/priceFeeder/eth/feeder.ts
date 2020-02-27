@@ -52,12 +52,12 @@ export class EthFeeder implements FeederKind {
   constructor(web3Provider: string, privateKey: string, oracleAddr: string, gasLimit: number) {
     this.web3 = new Web3(web3Provider);
     this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
-    this.oracle = new this.web3.eth.Contract(simplePriceOracleAbi, oracleAddr);
+    this.oracle = new this.web3.eth.Contract(simplePriceOracleAbi as web3Utils.AbiItem[], oracleAddr);
     this.oracleAddr = oracleAddr;
     this.gasLimit = gasLimit;
   }
 
-  public setup = async (): Promise<void> => {};
+  public setup = async (): Promise<void> => Promise.resolve();
 
   private feedOne = async (price: string, { symbol }: Listing, nonce: number) => {
     const tx = withGasPrice({
@@ -65,7 +65,7 @@ export class EthFeeder implements FeederKind {
       to: this.oracleAddr,
       nonce,
       data: this.encodeCalldata(price, addrOfSymbol(symbol)),
-      gas: this.gasLimit,
+      gas: this.gasLimit
     });
     const { rawTransaction } = await this.account.signTransaction(tx);
 
@@ -121,6 +121,6 @@ export const newEthFeeder = (): EthFeeder => {
     process.env.WEB3_PROVIDER,
     process.env.ETH_PRIVATE_KEY,
     oracleAddr,
-    Number(process.env.GAS_LIMIT),
+    Number(process.env.GAS_LIMIT)
   );
 };

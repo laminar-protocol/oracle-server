@@ -3,8 +3,8 @@ import { Account } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 import * as web3Utils from 'web3-utils';
 
-import deployment from 'flow-protocol/artifacts/deployment.json';
-import simplePriceOracleAbi from 'flow-protocol/artifacts/abi/SimplePriceOracle.json';
+import kovanDeployment from 'flow-protocol/artifacts/kovan/deployment.json';
+import kovanSimplePriceOracleAbi from 'flow-protocol/artifacts/kovan/abi/SimplePriceOracle.json';
 
 import logger from '../../logger';
 import { FeederKind, Listing } from '../types';
@@ -14,9 +14,11 @@ import symbolKeys from './symbolKeys.json';
  * Query a deployed address of a given key.
  * @param key key of flow-protocl artifacts `deployement.json`, for instance `oracle`, `fEUR`.
  */
-const deployedAddrs = (key: string): string => {
-  const deployed = (deployment as any)[process.env.CHAIN];
-  return deployed && deployed[key];
+const deployedAddrs = (key: string): string | null => {
+  if (process.env.CHAIN === 'kovan') {
+    return (kovanDeployment as any)?.[key];
+  }
+  return null;
 };
 
 const addrOfSymbol = (symbol: string): string => {
@@ -52,7 +54,7 @@ export class EthFeeder implements FeederKind {
   constructor(web3Provider: string, privateKey: string, oracleAddr: string, gasLimit: number) {
     this.web3 = new Web3(web3Provider);
     this.account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
-    this.oracle = new this.web3.eth.Contract(simplePriceOracleAbi as web3Utils.AbiItem[], oracleAddr);
+    this.oracle = new this.web3.eth.Contract(kovanSimplePriceOracleAbi as web3Utils.AbiItem[], oracleAddr);
     this.oracleAddr = oracleAddr;
     this.gasLimit = gasLimit;
   }

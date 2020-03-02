@@ -1,5 +1,6 @@
 {
   "version": "0.1.0",
+  "license": "Apache-2",
   "engines": {
     "yarn": "1.x",
     "node": "12.x"

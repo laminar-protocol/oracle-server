@@ -50,7 +50,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
     await cryptoWaitReady();
     const keyring = new Keyring({ type: 'ed25519' });
     this.account = keyring.addFromUri(this.keySeed);
-    logger.info({ label, message: `Oracle address: ${this.account.address}` });
+    logger.info({ label, message: `Feeder address: ${this.account.address}` });
   };
 
   abstract oracleKeyFromListing(listing: Listing): any;

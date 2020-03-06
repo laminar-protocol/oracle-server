@@ -25,7 +25,7 @@ const withoutPrecision = (amount: string): string =>
     .div(10000)
     .toFixed();
 
-const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number) => {
+const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number): Promise<boolean> => {
   if (!SYMBOLS.includes(symbol)) {
     return;
   }
@@ -37,7 +37,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   const [listingAmount, baseAmount]: [BN, BN] = pool.map((x: any) => new BN(x.toString()));
   if (listingAmount.isZero()) {
     logger.info({ label, message: `No need to swap ${symbol}: zero listing amount.` });
-    return;
+    return false;
   }
 
   const dexPrice = baseAmount.div(listingAmount);
@@ -45,7 +45,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   const gapRatio = price.minus(dexPrice).div(price).abs();
   if (gapRatio.isLessThan(ARBITRAGE_RATIO)) {
     logger.info({ label, message: `No need to swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
-    return;
+    return false;
   }
   logger.info({ label, message: `Swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
 
@@ -54,7 +54,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   const newBaseAmount = constProduct.multipliedBy(price).squareRoot();
   const newListingAmount = constProduct.div(newBaseAmount);
 
-  let tx;
+  let tx: any;
   let swapSummary: string;
   // if dex price is low, buy listing; else sell listing.
   if (dexPrice.isLessThan(price)) {
@@ -68,25 +68,28 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
     tx = api.tx.dex.swapCurrency([currencyId, supplyAmount], [BASE_CURRENCY_ID, targetAmount]);
     swapSummary = `Swap: supply ${withoutPrecision(supplyAmount)} ${currencyId} for ${withoutPrecision(targetAmount)} ${BASE_CURRENCY_ID}`;
   }
-
+  logger.info({ label, message: `Sending: ${swapSummary} nonce: ${nonce}` });
   try {
     const unsub = await tx.signAndSend(account, { nonce }, (result: SubmittableResult) => {
-      if (result.status.isFinalized) {
-        let extrinsicFailed = false;
-        result.events.forEach(({ event: { method, section } }) => {
-          if (section === 'system' && method === 'ExtrinsicFailed') {
-            extrinsicFailed = true;
-            logger.error({
-              label,
-              message: `${swapSummary} failed, block hash ${result.status.asFinalized}`
-            });
-          }
-        });
+      if (result.isCompleted) {
+        let extrinsicFailed = result.isError;
+        if (result.isInBlock) {
+          result.events.forEach(({ event: { method, section } }) => {
+            if (section === 'system' && method === 'ExtrinsicFailed') {
+              extrinsicFailed = true;
+            }
+          });
+        }
 
-        if (!extrinsicFailed) {
+        if (extrinsicFailed) {
+          logger.error({
+            label,
+            message: `Failed: ${swapSummary}, block hash ${result.isInBlock ? result.status.asInBlock : '-'}, tx hash ${tx.hash}, result: ${JSON.stringify(result.toHuman())}`
+          });
+        } else {
           logger.info({
             label,
-            message: `${swapSummary} success, block hash ${result.status.asFinalized}`
+            message: `Success: ${swapSummary}, block hash ${result.status.isInBlock}, tx hash ${tx.hash}`
           });
         }
 
@@ -94,15 +97,22 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
       }
     });
   } catch (err) {
-    logger.error({ label, message: `${swapSummary} failed: ${err}` });
+    logger.error({ label, message: `Failed: ${swapSummary}: ${err}` });
+    return false;
   }
+
+  return true;
 };
 
 const swap = async (api: ApiPromise, account: KeyringPair, priceStrs: string[], listings: Listing[], startingNonce: number): Promise<void> => {
+  let nonce = startingNonce;
   for (const [i, p] of priceStrs.entries()) {
     const listing = listings[i];
     try {
-      await swapOne(api, account, p, listing, startingNonce + i);
+      const sent = await swapOne(api, account, p, listing, nonce);
+      if (sent) {
+        nonce += 1;
+      }
     } catch (err) {
       logger.error({ label, message: `Swap ${listing.symbol} failed: ${err}` });
     }

@@ -36,7 +36,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   const pool: any = await api.query.dex.liquidityPool(currencyId);
   const [listingAmount, baseAmount]: [BN, BN] = pool.map((x: any) => new BN(x.toString()));
   if (listingAmount.isZero()) {
-    logger.info({ label, message: `No need to swap ${symbol}: zero listing amount.` });
+    logger.debug({ label, message: `No need to swap ${symbol}: zero listing amount.` });
     return false;
   }
 
@@ -44,7 +44,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
 
   const gapRatio = price.minus(dexPrice).div(price).abs();
   if (gapRatio.isLessThan(ARBITRAGE_RATIO)) {
-    logger.info({ label, message: `No need to swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
+    logger.debug({ label, message: `No need to swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });
     return false;
   }
   logger.info({ label, message: `Swap ${symbol}: price $${priceStr}, dex price $${dexPrice}.` });

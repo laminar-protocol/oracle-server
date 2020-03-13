@@ -14,7 +14,7 @@ export default class AcalaFeeder extends SubstrateFeeder {
   }
 
   async onNewPrices(prices: string[], listings: Listing[], nonce: number) {
-    await swap(this.api, this.account, prices, listings, nonce);
+    await swap(this.api, this.account, prices, listings, nonce, this.tip);
   }
 }
 

@@ -35,6 +35,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
   private keySeed: string;
   protected account: KeyringPair;
   private customTypes: Record<any, any>;
+  protected tip: number;
 
   constructor(endpoint: string, keySeed: string, customTypes: Record<any, any>) {
     this.provider = createProvider(endpoint);
@@ -83,7 +84,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
     const tx: any = this.api.tx.oracle.feedValues(zipped);
 
     try {
-      const unsub = await tx.signAndSend(this.account, { nonce }, (result: SubmittableResult) => {
+      const unsub = await tx.signAndSend(this.account, { nonce, tip: this.tip }, (result: SubmittableResult) => {
         if (result.status.isFinalized) {
           let extrinsicFailed = false;
           result.events.forEach(({ event: { method, section } }) => {
@@ -102,12 +103,17 @@ export default abstract class SubstrateFeeder implements FeederKind {
               label,
               message: `Feeding success: ${summary}, block hash ${result.status.asFinalized}`
             });
+            this.tip = 0;
           }
 
           unsub();
         }
+        if (result.isError) {
+          this.tip += 1;
+        }
       });
     } catch (err) {
+      this.tip += 1;
       logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
     }
 

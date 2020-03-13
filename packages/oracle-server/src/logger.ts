@@ -1,4 +1,35 @@
 import { createLogger, format, transports } from 'winston';
+import Transport from 'winston-transport';
+import { IncomingWebhook } from '@slack/webhook';
+import { LEVEL, MESSAGE } from 'triple-beam';
+
+class SlackLogger extends Transport {
+  webhook: IncomingWebhook
+
+  constructor() {
+    super();
+    this.webhook = new IncomingWebhook(process.env.SLACK_WEBHOOK_URL);
+  }
+
+  async log(info: any, callback: any) {
+    setImmediate(() => {
+      this.emit('logged', info);
+    });
+
+    const level = info[LEVEL];
+    switch (level) {
+      case 'info':
+      case 'error':
+      case 'warn':
+        await this.webhook.send({
+          text: info[MESSAGE]
+        });
+        break;
+    }
+
+    callback();
+  }
+}
 
 const newLogger = () => {
   const { combine, timestamp: timestampFormat, printf } = format;
@@ -20,6 +51,9 @@ const newLogger = () => {
   });
   if (process.env.CONSOLE_LOG === 'true') {
     logger.add(new transports.Console());
+  }
+  if (process.env.SLACK_WEBHOOK_URL) {
+    logger.add(new SlackLogger());
   }
   return logger;
 };

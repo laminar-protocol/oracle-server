@@ -25,7 +25,7 @@ const withoutPrecision = (amount: string): string =>
     .div(10000)
     .toFixed();
 
-const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number): Promise<boolean> => {
+const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, { symbol }: Listing, nonce: number, tip: number): Promise<boolean> => {
   if (!SYMBOLS.includes(symbol)) {
     return;
   }
@@ -70,7 +70,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   }
   logger.info({ label, message: `Sending: ${swapSummary} nonce: ${nonce}` });
   try {
-    const unsub = await tx.signAndSend(account, { nonce }, (result: SubmittableResult) => {
+    const unsub = await tx.signAndSend(account, { nonce, tip }, (result: SubmittableResult) => {
       if (result.isCompleted) {
         let extrinsicFailed = result.isError;
         if (result.isInBlock) {
@@ -89,7 +89,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
         } else {
           logger.info({
             label,
-            message: `Success: ${swapSummary}, block hash ${result.status.isInBlock}, tx hash ${tx.hash}`
+            message: `Success: ${swapSummary}, block hash ${result.isInBlock ? result.status.asInBlock : '-'}, tx hash ${tx.hash}`
           });
         }
 
@@ -104,12 +104,12 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
   return true;
 };
 
-const swap = async (api: ApiPromise, account: KeyringPair, priceStrs: string[], listings: Listing[], startingNonce: number): Promise<void> => {
+const swap = async (api: ApiPromise, account: KeyringPair, priceStrs: string[], listings: Listing[], startingNonce: number, tip: number): Promise<void> => {
   let nonce = startingNonce;
   for (const [i, p] of priceStrs.entries()) {
     const listing = listings[i];
     try {
-      const sent = await swapOne(api, account, p, listing, nonce);
+      const sent = await swapOne(api, account, p, listing, nonce, tip);
       if (sent) {
         nonce += 1;
       }

@@ -97,7 +97,7 @@ const swapOne = async (api: ApiPromise, account: KeyringPair, priceStr: string, 
       }
     });
   } catch (err) {
-    logger.error({ label, message: `Failed: ${swapSummary}: ${err}` });
+    logger.error({ label, message: `Failed: ${swapSummary}: ${err} tip: ${tip}` });
     return false;
   }
 

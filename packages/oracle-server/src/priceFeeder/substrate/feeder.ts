@@ -83,8 +83,9 @@ export default abstract class SubstrateFeeder implements FeederKind {
     ]);
     const tx: any = this.api.tx.oracle.feedValues(zipped);
 
+    const tip = this.tip;
     try {
-      const unsub = await tx.signAndSend(this.account, { nonce, tip: this.tip }, (result: SubmittableResult) => {
+      const unsub = await tx.signAndSend(this.account, { nonce, tip }, (result: SubmittableResult) => {
         if (result.status.isFinalized) {
           let extrinsicFailed = false;
           result.events.forEach(({ event: { method, section } }) => {
@@ -114,7 +115,7 @@ export default abstract class SubstrateFeeder implements FeederKind {
       });
     } catch (err) {
       this.tip += 1;
-      logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err}` });
+      logger.error({ label, message: `Invalid tx ${listings.map((l) => l.symbol).join(' ')}: ${err} tip: ${tip}` });
     }
 
     // FIXME: refactor to decouple price feed and swap
